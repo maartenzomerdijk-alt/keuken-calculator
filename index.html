@@ -3,1066 +3,1536 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Keuken Offerte &amp; Ontwerp Calculator</title>
+<title>KeukenLab Configurator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --cream:#F6F1E8;--cream-dark:#EDE6D7;
-  --oak:#C4935A;--oak-dark:#A87540;--oak-light:#DEBB90;--oak-muted:rgba(196,147,90,.13);
-  --text:#2A2016;--text-muted:#7A6E5D;
-  --border:#D9CFBE;--white:#FEFCF7;
-  --error:#B03030;--error-bg:#FDF0EF;
-  --warn:#A06010;--warn-bg:#FEF8EC;
-  --disabled:#BEB5A8;
-  --shadow:0 2px 14px rgba(42,32,22,.08);
+  --cream:#F5F0E8;--cream-dk:#EDE8DF;
+  --oak:#C4935A;--oak-dk:#A67840;--oak-lt:#D4A96A;
+  --char:#2C2825;--char-lt:#4A4540;
+  --white:#FFFFFF;
+  --border:#DDD5C8;--border-dk:#C4B9AB;
+  --shadow:0 2px 12px rgba(44,40,37,.09);
+  --r-sm:6px;--r-md:10px;--r-lg:16px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;line-height:1.6}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--char);line-height:1.6;min-height:100vh}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600}
 
-/* ── API Bar ── */
-.api-bar{background:var(--text);padding:.6rem 2rem;display:flex;align-items:center;gap:.75rem;font-size:.8rem;color:rgba(255,255,255,.7)}
-.api-bar label{white-space:nowrap;color:rgba(255,255,255,.85);font-weight:500}
-.api-bar input{flex:1;max-width:340px;padding:.35rem .7rem;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.08);color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none}
-.api-bar input::placeholder{color:rgba(255,255,255,.35)}
-.api-bar input:focus{border-color:var(--oak-light)}
-.api-key-hint{font-size:.75rem;color:rgba(255,255,255,.45)}
+/* ── Top bar ── */
+.topbar{background:var(--char);color:#fff;padding:.55rem 1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar .brand{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--oak-lt);font-weight:700;white-space:nowrap}
+.topbar .brand b{color:#fff;font-weight:400}
+.api-wrap{display:flex;align-items:center;gap:.5rem;margin-left:auto;flex-wrap:wrap}
+.api-wrap label{font-size:.78rem;color:rgba(255,255,255,.6);white-space:nowrap}
+.api-wrap input{width:210px;padding:.3rem .65rem;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);border-radius:var(--r-sm);color:#fff;font-family:'DM Sans',sans-serif;font-size:.78rem;outline:none}
+.api-wrap input::placeholder{color:rgba(255,255,255,.3)}
+.api-wrap input:focus{border-color:var(--oak-lt)}
 
-/* ── Header ── */
-.site-header{background:var(--white);border-bottom:2px solid var(--oak-light);padding:1.1rem 2rem;display:flex;align-items:center;gap:1rem}
-.logo-mark{width:46px;height:46px;background:var(--oak);border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:1.4rem;color:#fff}
-.site-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;line-height:1.2}
-.site-header p{font-size:.8rem;color:var(--text-muted)}
+/* ── Tab bar ── */
+.tabbar{background:var(--white);border-bottom:2px solid var(--border);display:flex;padding:0 1.5rem;position:sticky;top:42px;z-index:190}
+.tabbtn{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:.8rem 1.25rem;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;color:var(--char-lt);cursor:pointer;transition:.2s;white-space:nowrap}
+.tabbtn:hover{color:var(--char)}
+.tabbtn.active{color:var(--oak);border-bottom-color:var(--oak);font-weight:600}
 
-/* ── Layout ── */
-.app{display:flex;max-width:1360px;margin:0 auto;padding:2rem 1.75rem;gap:2rem;align-items:flex-start}
-.main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1.5rem}
-.sidebar{width:360px;flex-shrink:0;position:sticky;top:1.5rem}
+/* ── Tab panes ── */
+.tabpane{display:none}
+.tabpane.active{display:block}
 
-/* ── Step card ── */
-.step{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.step-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;gap:.8rem}
-.step-num{width:30px;height:30px;background:var(--oak);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;flex-shrink:0}
-.step-title{font-family:'Playfair Display',serif;font-size:1.15rem}
-.step-body{padding:1.5rem}
+/* ── Offerte layout ── */
+.off-layout{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;padding:1.5rem;max-width:1380px;margin:0 auto;align-items:start}
+@media(max-width:1060px){.off-layout{grid-template-columns:1fr}}
+@media(max-width:640px){.off-layout{padding:1rem;gap:1rem}}
+
+/* ── Cards ── */
+.card{background:var(--white);border-radius:var(--r-lg);padding:1.4rem;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:1rem}
+.card:last-child{margin-bottom:0}
+.card-hd{display:flex;align-items:center;gap:.7rem;margin-bottom:1.15rem}
+.step-badge{width:28px;height:28px;background:var(--oak);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.card-hd h2{font-size:1.1rem}
 
 /* ── Style cards ── */
-.style-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
-.style-card{position:relative;border:2px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;background:var(--cream);transition:border-color .2s,background .2s,box-shadow .2s;user-select:none}
-.style-card:hover{border-color:var(--oak-light);background:var(--white)}
-.style-card.selected{border-color:var(--oak);background:var(--white);box-shadow:0 0 0 4px var(--oak-muted)}
-.style-card-icon{font-size:1.6rem;margin-bottom:.4rem;line-height:1}
-.style-card-name{font-family:'Playfair Display',serif;font-size:1.05rem}
-.style-card-desc{font-size:.78rem;color:var(--text-muted);margin:.2rem 0 .5rem}
-.style-card-price{font-size:.82rem;font-weight:600;color:var(--oak)}
-.check-mark{position:absolute;top:.7rem;right:.7rem;width:22px;height:22px;background:var(--oak);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:.7rem;opacity:0;transition:opacity .2s}
-.style-card.selected .check-mark{opacity:1}
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.875rem}
+.style-card{border:2px solid var(--border);border-radius:var(--r-md);padding:1rem;cursor:pointer;background:var(--cream);transition:.2s;position:relative;user-select:none}
+.style-card:hover{border-color:var(--oak-lt);transform:translateY(-2px);box-shadow:var(--shadow)}
+.style-card.sel{border-color:var(--oak);background:#FBF6F0}
+.style-card .swatch{width:100%;height:56px;border-radius:var(--r-sm);margin-bottom:.65rem}
+.style-card .sname{font-weight:600;font-size:.9rem}
+.style-card .sprice{font-size:.78rem;color:var(--oak);font-weight:600;margin-top:.15rem}
+.style-card .sweeks{font-size:.73rem;color:#999}
+.style-card.sel::after{content:'✓';position:absolute;top:8px;right:10px;color:var(--oak);font-weight:700;font-size:.8rem}
 
-/* ── Dimensions ── */
-.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
-.form-group{display:flex;flex-direction:column;gap:.35rem}
-label{font-size:.85rem;font-weight:500}
-.input-wrap{position:relative}
-input[type="number"],select{width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.95rem;background:var(--cream);color:var(--text);outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none}
-input[type="number"]:focus,select:focus{border-color:var(--oak)}
-input.has-error{border-color:var(--error)!important}
-.input-unit{position:absolute;right:.8rem;top:50%;transform:translateY(-50%);font-size:.78rem;color:var(--text-muted);pointer-events:none}
-.field-msg{font-size:.78rem;min-height:1.1em;line-height:1.3}
-.field-msg.err{color:var(--error)}
-.field-msg.warn{color:var(--warn);background:var(--warn-bg);padding:.35rem .6rem;border-radius:6px;border-left:3px solid var(--warn)}
-.btn-group{display:flex;gap:.5rem}
-.btn-pill{flex:1;padding:.65rem .4rem;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);text-align:center;transition:all .2s}
-.btn-pill:hover{border-color:var(--oak-light)}
-.btn-pill.selected{border-color:var(--oak);background:var(--white);color:var(--oak);font-weight:600}
-.setup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
-.setup-card{border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1rem;cursor:pointer;background:var(--cream);text-align:left;font-family:'DM Sans',sans-serif;transition:all .2s}
-.setup-card:hover{border-color:var(--oak-light);background:var(--white)}
-.setup-card.selected{border-color:var(--oak);background:var(--white)}
-.setup-name{font-size:.9rem;font-weight:600;display:block}
-.setup-desc{font-size:.75rem;color:var(--text-muted)}
-.setup-extra{font-size:.75rem;color:var(--oak);font-weight:600}
+/* ── Form inputs ── */
+.form-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.875rem}
+.fg{display:flex;flex-direction:column;gap:.3rem}
+.fg label{font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em}
+.fg input,.fg select{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:.5rem .7rem;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--char);background:var(--white);transition:.2s;-moz-appearance:textfield}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--oak);box-shadow:0 0 0 3px rgba(196,147,90,.14)}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+.warn-banner{background:#FFF8E1;border:1px solid #FFD54F;border-radius:var(--r-sm);padding:.55rem .8rem;font-size:.83rem;color:#5D4037;display:flex;align-items:center;gap:.5rem;margin-top:.65rem}
+.warn-banner.hidden{display:none}
 
-/* ── Toggles ── */
-.toggle-list{display:flex;flex-direction:column;gap:.7rem}
-.toggle-item{display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem;border:1.5px solid var(--border);border-radius:11px;background:var(--cream);cursor:pointer;transition:all .2s;position:relative;user-select:none}
-.toggle-item:hover:not(.is-disabled){border-color:var(--oak-light);background:var(--white)}
-.toggle-item.is-selected{border-color:var(--oak);background:var(--white)}
-.toggle-item.is-hidden{display:none}
-.toggle-item.is-disabled{opacity:.5;cursor:not-allowed;background:var(--cream-dark)}
-.sw{width:42px;height:24px;background:var(--border);border-radius:12px;position:relative;flex-shrink:0;margin-top:2px;transition:background .2s}
-.sw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.18)}
-.toggle-item.is-selected .sw{background:var(--oak)}
-.toggle-item.is-selected .sw::after{left:21px}
-.toggle-content{flex:1;min-width:0}
-.toggle-name{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.toggle-desc{font-size:.78rem;color:var(--text-muted);margin-top:.1rem}
-.toggle-reason{font-size:.74rem;color:var(--text-muted);font-style:italic;margin-top:.15rem}
-.toggle-price{font-size:.85rem;font-weight:600;color:var(--oak);white-space:nowrap;margin-top:2px}
-.badge{font-size:.68rem;padding:.12rem .45rem;border-radius:20px;font-weight:500;line-height:1.5}
-.badge-rec{background:rgba(196,147,90,.14);color:var(--oak-dark);border:1px solid var(--oak-light)}
+/* ── Layout picker ── */
+.layout-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:.65rem;margin-top:1rem}
+.lay-card{border:2px solid var(--border);border-radius:var(--r-md);padding:.75rem .5rem;cursor:pointer;transition:.2s;text-align:center;background:var(--cream);user-select:none}
+.lay-card:hover{border-color:var(--oak-lt)}
+.lay-card.sel{border-color:var(--oak);background:#FBF6F0}
+.lay-card svg{display:block;margin:0 auto .4rem}
+.lay-card .lname{font-size:.78rem;font-weight:600}
+.lay-card .lsurch{font-size:.7rem;color:var(--oak)}
 
-/* ── Step 5 – Color & Finish ── */
-.color-grid{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
-.color-swatch{display:flex;flex-direction:column;align-items:center;gap:.35rem;cursor:pointer}
-.color-dot{width:42px;height:42px;border-radius:50%;border:2.5px solid transparent;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.12)}
-.color-swatch:hover .color-dot{transform:scale(1.1)}
-.color-swatch.selected .color-dot{border-color:var(--oak);box-shadow:0 0 0 3px var(--oak-muted),0 2px 6px rgba(0,0,0,.15)}
-.color-swatch span{font-size:.72rem;color:var(--text-muted);text-align:center}
-.color-swatch.selected span{color:var(--oak);font-weight:600}
-.finish-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
-.finish-btn{flex:1;min-width:110px;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all .2s}
-.finish-btn:hover{border-color:var(--oak-light);background:var(--white)}
-.finish-btn.selected{border-color:var(--oak);background:var(--white)}
-.finish-btn-name{font-size:.88rem;font-weight:600;display:block}
-.finish-btn-desc{font-size:.73rem;color:var(--text-muted)}
-.wishes-wrap textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);color:var(--text);outline:none;resize:vertical;min-height:80px;transition:border-color .2s}
-.wishes-wrap textarea:focus{border-color:var(--oak)}
-.char-count{font-size:.72rem;color:var(--text-muted);text-align:right;margin-top:.25rem}
+/* ── Option toggles ── */
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:.65rem}
+.opt-card{border:1.5px solid var(--border);border-radius:var(--r-md);padding:.8rem .9rem;cursor:pointer;transition:.2s;display:flex;align-items:flex-start;gap:.65rem;background:var(--cream);user-select:none;position:relative}
+.opt-card:hover:not(.disabled){border-color:var(--oak-lt)}
+.opt-card.sel{border-color:var(--oak);background:#FBF6F0}
+.opt-card.disabled{opacity:.42;cursor:not-allowed}
+.opt-chk{width:17px;height:17px;border:2px solid var(--border-dk);border-radius:4px;flex-shrink:0;margin-top:1px;display:grid;place-items:center;transition:.2s}
+.opt-card.sel .opt-chk{background:var(--oak);border-color:var(--oak)}
+.opt-card.sel .opt-chk::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
+.opt-name{font-size:.84rem;font-weight:600;line-height:1.3}
+.opt-price{font-size:.77rem;color:var(--oak);font-weight:600}
+.opt-note{font-size:.71rem;color:#999;margin-top:.15rem}
 
-/* ── Generate button ── */
-.generate-wrap{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);padding:1.75rem;text-align:center}
-.generate-wrap h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:.4rem}
-.generate-wrap p{font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem}
-.btn-generate{padding:.9rem 2rem;background:var(--oak);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em;display:inline-flex;align-items:center;gap:.6rem}
-.btn-generate:hover:not(:disabled){background:var(--oak-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(196,147,90,.4)}
-.btn-generate:disabled{background:var(--disabled);cursor:not-allowed;transform:none;box-shadow:none}
+/* ── Appliance toggles ── */
+.appl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:.65rem}
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:.65rem;margin-top:.875rem}
+
+/* ── Color picker ── */
+.color-row{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.875rem}
+.cswatch{width:40px;height:40px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s}
+.cswatch:hover{transform:scale(1.12)}
+.cswatch.sel{border-color:var(--char);box-shadow:0 0 0 2px var(--white),0 0 0 4px var(--char)}
+.finish-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.875rem}
+.fin-btn{padding:.38rem .9rem;border:1.5px solid var(--border);border-radius:99px;background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.83rem;cursor:pointer;transition:.2s}
+.fin-btn.sel{background:var(--oak);border-color:var(--oak);color:#fff}
+.wishes-ta{width:100%;border:1.5px solid var(--border);border-radius:var(--r-sm);padding:.6rem .8rem;font-family:'DM Sans',sans-serif;font-size:.875rem;color:var(--char);background:var(--white);resize:vertical;min-height:76px}
+.wishes-ta:focus{outline:none;border-color:var(--oak)}
+.char-count{font-size:.72rem;color:#999;text-align:right;margin-top:.2rem}
+
+/* ── Floor plan ── */
+.fp-wrap{background:var(--cream-dk);border:1px solid var(--border);border-radius:var(--r-md);padding:.875rem;margin-top:.5rem}
+#fpSvg{width:100%;height:auto;display:block}
+
+/* ── AI card ── */
+.ai-btn{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,#5B4FD4,#8B3FC4);color:#fff;border:none;border-radius:var(--r-md);padding:.6rem 1.2rem;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:.2s;margin-top:.5rem}
+.ai-btn:hover{opacity:.88;transform:translateY(-1px);box-shadow:var(--shadow)}
+.ai-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.ai-result{background:#0F1117;color:#E6EDF3;border-radius:var(--r-lg);padding:1.4rem;margin-top:.875rem;display:none}
+.ai-result.show{display:block}
+.ai-result h3{font-family:'Playfair Display',serif;font-size:1.15rem;color:#A78BFA;margin-bottom:.4rem}
+.ai-desc{font-size:.875rem;color:#CDD5E0;margin-bottom:.875rem}
+.ai-hl-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#E3B341;margin-bottom:.35rem;font-weight:600}
+.ai-hl li{font-size:.83rem;color:#E6EDF3;padding:.18rem 0 .18rem 1.1em;position:relative;list-style:none}
+.ai-hl li::before{content:'→';position:absolute;left:0;color:var(--oak-lt)}
+.ai-advice{font-size:.83rem;color:#9CA3AF;border-top:1px solid rgba(255,255,255,.09);padding-top:.65rem;margin-top:.65rem}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Sidebar ── */
-.sidebar-panel{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.sidebar-top{background:var(--text);padding:1.25rem 1.4rem;color:#fff}
-.sidebar-top h2{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:.15rem}
-.sidebar-top p{font-size:.78rem;opacity:.65}
-.sidebar-body{padding:1.25rem 1.3rem}
-.q-section{margin-bottom:.9rem}
-.q-label{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:.4rem;border-bottom:1px solid var(--cream-dark);margin-bottom:.4rem}
-.q-row{display:flex;justify-content:space-between;align-items:baseline;padding:.28rem 0;font-size:.85rem}
-.q-name{color:var(--text-muted);flex:1;margin-right:.5rem}
-.q-val{font-weight:500;white-space:nowrap}
-.q-divider{height:1px;background:var(--cream-dark);margin:.9rem 0}
-.q-total-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.88rem}
-.q-total-row.big{font-size:1.1rem;font-weight:700;padding-top:.5rem}
-.q-total-row.muted{color:var(--text-muted);font-size:.82rem}
-.delivery-tag{background:var(--cream);border-radius:9px;padding:.7rem .9rem;display:flex;align-items:center;gap:.6rem;font-size:.84rem;margin-bottom:1rem;border:1px solid var(--cream-dark)}
-.warn-box{background:var(--error-bg);border:1px solid #d9a0a0;border-radius:9px;padding:.75rem;font-size:.8rem;color:var(--error);margin-bottom:1rem;display:none}
-.warn-box.show{display:block}
-.empty-hint{font-size:.82rem;color:var(--text-muted);font-style:italic;padding:.2rem 0}
-.btn-cta{width:100%;padding:1rem;background:var(--oak);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:.02em;transition:background .2s,transform .15s,box-shadow .15s}
-.btn-cta:hover:not(:disabled){background:var(--oak-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,147,90,.35)}
-.btn-cta:disabled{background:var(--disabled);cursor:not-allowed}
+.sidebar{position:sticky;top:90px}
+.sb-card{background:var(--char);color:#fff;border-radius:var(--r-lg);padding:1.4rem;box-shadow:0 6px 24px rgba(44,40,37,.22)}
+.sb-card h3{font-family:'Playfair Display',serif;color:var(--oak-lt);margin-bottom:1.1rem;font-size:1.05rem}
+.pl{display:flex;justify-content:space-between;align-items:baseline;padding:.3rem 0;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.05)}
+.pl:last-child{border-bottom:none}
+.pl .pll{color:#B0A898}
+.pl .plv{font-weight:500}
+.pl.sec{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:#777;padding-top:.75rem;padding-bottom:.15rem;border-bottom:none}
+.pl.tot{font-size:.9rem;font-weight:700;padding:.45rem 0}
+.pl.tot .pll{color:#fff}
+.pl.tot .plv{color:var(--oak-lt)}
+.pl.grand{background:rgba(196,147,90,.14);border-radius:var(--r-sm);padding:.65rem .75rem;margin-top:.5rem}
+.pl.grand .pll{color:#fff;font-weight:700;font-size:.95rem}
+.pl.grand .plv{color:var(--oak-lt);font-size:1.25rem;font-weight:700}
+.sb-meta{margin-top:.875rem;padding-top:.875rem;border-top:1px solid rgba(255,255,255,.09)}
+.sb-meta .mr{display:flex;justify-content:space-between;font-size:.78rem;padding:.22rem 0}
+.sb-meta .mrl{color:#888}
+.sb-meta .mrv{color:#fff;font-weight:500}
+.cta-btn{width:100%;margin-top:1.1rem;background:var(--oak);color:#fff;border:none;border-radius:var(--r-md);padding:.8rem;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s}
+.cta-btn:hover{background:var(--oak-dk)}
 
-/* ── Visualization section ── */
-.viz-section{max-width:1360px;margin:0 auto;padding:0 1.75rem 3rem}
-.viz-loading{display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:3rem;background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1.5rem}
-.viz-loading.show{display:flex}
-.loading-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text-muted)}
-.loading-dots::after{content:'';animation:dots 1.5s infinite}
-@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
-.pencil-svg{animation:pencil-rock .9s ease-in-out infinite alternate}
-@keyframes pencil-rock{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+/* ── Production tab ── */
+.prod-wrap{max-width:1100px;margin:0 auto;padding:1.5rem}
+@media(max-width:640px){.prod-wrap{padding:1rem}}
+.acc{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:.875rem}
+.acc-hd{display:flex;align-items:center;justify-content:space-between;padding:1.05rem 1.4rem;cursor:pointer;transition:.2s;user-select:none}
+.acc-hd:hover{background:var(--cream)}
+.acc-hd-left{display:flex;align-items:center;gap:.65rem;font-family:'Playfair Display',serif;font-size:1rem}
+.acc-badge{background:var(--oak);color:#fff;border-radius:4px;padding:.12rem .45rem;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600}
+.acc-chev{font-size:.95rem;color:#999;transition:transform .2s}
+.acc-hd.open .acc-chev{transform:rotate(180deg)}
+.acc-body{padding:0 1.4rem 1.4rem;border-top:1px solid var(--border)}
 
-.viz-error{display:none;background:var(--error-bg);border:1px solid #d9a0a0;border-radius:14px;padding:1.5rem;color:var(--error);margin-bottom:1.5rem;font-size:.9rem}
-.viz-error.show{display:block}
+/* ── Tables ── */
+.tbl-wrap{overflow-x:auto;margin-top:.65rem}
+table.dt{width:100%;border-collapse:collapse;font-size:.83rem}
+table.dt th{background:var(--cream-dk);padding:.45rem .65rem;text-align:left;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--char-lt);border-bottom:2px solid var(--border-dk);white-space:nowrap;cursor:pointer;user-select:none}
+table.dt th:hover{color:var(--oak)}
+table.dt td{padding:.4rem .65rem;border-bottom:1px solid var(--border);color:var(--char)}
+table.dt tr:last-child td{border-bottom:none}
+table.dt tr:hover td{background:var(--cream)}
+table.dt .tr-tot td{background:var(--cream-dk);font-weight:600;border-top:2px solid var(--border-dk)}
+.badge-base{display:inline-block;padding:.08rem .45rem;border-radius:99px;font-size:.66rem;font-weight:600;background:#E3F2FD;color:#1565C0}
+.badge-tall{display:inline-block;padding:.08rem .45rem;border-radius:99px;font-size:.66rem;font-weight:600;background:#FFF3E0;color:#E65100}
+.btn-exp{display:inline-flex;align-items:center;gap:.35rem;background:var(--cream-dk);border:1.5px solid var(--border-dk);border-radius:var(--r-sm);padding:.4rem .8rem;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;margin-top:.65rem;color:var(--char);transition:.2s}
+.btn-exp:hover{background:var(--border)}
 
-.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
-.viz-card{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.viz-card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--cream-dark);font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:.5rem}
-.viz-card-body{padding:1rem;display:flex;justify-content:center}
-.viz-card-body svg{max-width:100%;height:auto}
+/* ── Plate diagrams ── */
+.plates-row{display:flex;flex-wrap:wrap;gap:1rem;margin-top:.75rem}
+.plate-box h5{font-size:.78rem;color:var(--char-lt);margin-bottom:.35rem}
+.plate-util{font-size:.83rem;margin-top:.35rem}
+.plate-util b{font-weight:600}
 
-.design-card{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:1.5rem}
-.design-card-head{background:linear-gradient(135deg,var(--text) 0%,#4A3525 100%);padding:1.75rem 2rem;color:#fff}
-.design-card-head h2{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:.5rem}
-.design-card-head p{font-size:.9rem;opacity:.8;line-height:1.6}
-.design-card-body{padding:1.75rem 2rem}
-.design-highlights{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem}
-.design-highlights li{display:flex;align-items:flex-start;gap:.6rem;font-size:.9rem}
-.design-highlights li::before{content:'◆';color:var(--oak);font-size:.65rem;margin-top:.3rem;flex-shrink:0}
-.style-advice-box{background:var(--oak-muted);border:1px solid var(--oak-light);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:.875rem;color:var(--text);line-height:1.6}
-.style-advice-box strong{color:var(--oak-dark);display:block;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.25rem}
-.prompt-box-wrap{background:var(--cream);border-radius:10px;padding:1rem;border:1px solid var(--border)}
-.prompt-box-label{font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between}
-.btn-copy{padding:.2rem .6rem;background:var(--oak);color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.72rem;cursor:pointer;transition:background .2s}
-.btn-copy:hover{background:var(--oak-dark)}
-.prompt-textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--text-muted);background:var(--white);resize:none;height:80px;line-height:1.5}
+/* ── CNC chart ── */
+#cncChart{width:100%;display:block;margin:1rem 0}
+.amber-warn{background:#FFF8E1;border:1px solid #FFD54F;border-radius:var(--r-sm);padding:.55rem .8rem;font-size:.83rem;color:#5D4037;margin-top:.65rem}
+.amber-warn.hidden{display:none}
 
-/* ── Responsive ── */
-@media(max-width:960px){
-  .app{flex-direction:column;padding:1rem}
-  .sidebar{width:100%;position:static}
-  .viz-grid{grid-template-columns:1fr}
-  .viz-section{padding:0 1rem 2rem}
-}
-@media(max-width:500px){
-  .style-grid{grid-template-columns:1fr}
-  .dim-grid{grid-template-columns:1fr}
-  .setup-grid{grid-template-columns:1fr}
-  .api-bar{padding:.6rem 1rem;flex-wrap:wrap}
-  .site-header{padding:1rem}
+/* ── Xilog ── */
+.xilog-pre{background:#0D1117;border:1px solid #30363D;border-radius:var(--r-md);padding:.9rem;font-family:'Courier New',monospace;font-size:.73rem;color:#E6EDF3;overflow:auto;max-height:400px;line-height:1.65;margin-top:.65rem;white-space:pre}
+.xc{color:#3FB950}.xh{color:#E3B341}.xk{color:#79C0FF}
+
+/* ── Summary stats ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.875rem;margin-top:.75rem}
+.stat-box{background:var(--cream);border:1px solid var(--border);border-radius:var(--r-md);padding:.9rem;text-align:center}
+.stat-val{font-size:1.6rem;font-weight:700;color:var(--oak);font-family:'Playfair Display',serif}
+.stat-lbl{font-size:.78rem;color:var(--char-lt);margin-top:.15rem}
+.print-btn{display:inline-flex;align-items:center;gap:.35rem;background:var(--char);color:#fff;border:none;border-radius:var(--r-sm);padding:.45rem .9rem;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;margin-top:.65rem}
+.print-btn:hover{background:var(--char-lt)}
+
+/* ── Print ── */
+@media print{
+  .topbar,.tabbar,#tab-offerte{display:none!important}
+  .tabpane{display:block!important}
+  #tab-prod{display:block!important}
+  .prod-wrap{padding:0;max-width:100%}
+  .acc-body{display:block!important;padding:.3rem 0}
+  .acc-hd{padding:.4rem 0}
+  body{background:#fff;font-size:10pt}
+  .btn-exp,.print-btn,.acc-chev{display:none}
+  .acc{border:none;box-shadow:none}
+  .xilog-pre{max-height:none}
 }
 </style>
 </head>
 <body>
 
-<!-- API Key Bar -->
-<div class="api-bar">
-  <label for="api-key-inp">&#128273; Anthropic API-sleutel:</label>
-  <input type="password" id="api-key-inp" placeholder="sk-ant-api03-...">
-  <span class="api-key-hint">Wordt alleen lokaal gebruikt &mdash; nooit verstuurd naar een server</span>
-</div>
-
-<!-- Header -->
-<header class="site-header">
-  <div class="logo-mark">&#9633;</div>
-  <div>
-    <h1>Keuken Offerte &amp; Ontwerp Calculator</h1>
-    <p>Stel uw droomkeuken samen en genereer een AI-visualisatie van uw ontwerp</p>
-  </div>
-</header>
-
-<!-- Main App -->
-<div class="app">
-  <main class="main">
-
-    <!-- Step 1 -->
-    <section class="step">
-      <div class="step-head"><div class="step-num">1</div><h2 class="step-title">Kies uw keukenstijl</h2></div>
-      <div class="step-body"><div class="style-grid" id="style-grid"></div></div>
-    </section>
-
-    <!-- Step 2 -->
-    <section class="step">
-      <div class="step-head"><div class="step-num">2</div><h2 class="step-title">Afmetingen &amp; opstelling</h2></div>
-      <div class="step-body">
-        <div class="dim-grid">
-          <div class="form-group">
-            <label for="inp-width">Breedte (cm)</label>
-            <div class="input-wrap">
-              <input type="number" id="inp-width" min="150" max="600" placeholder="bijv. 300">
-              <span class="input-unit">cm</span>
-            </div>
-            <span class="field-msg" id="msg-width"></span>
-          </div>
-          <div class="form-group">
-            <label for="inp-depth">Diepte (cm)</label>
-            <div class="input-wrap">
-              <input type="number" id="inp-depth" min="50" max="90" placeholder="bijv. 60">
-              <span class="input-unit">cm</span>
-            </div>
-            <span class="field-msg" id="msg-depth"></span>
-          </div>
-          <div class="form-group">
-            <label>Hoogte</label>
-            <div class="btn-group" id="height-group"></div>
-          </div>
-          <div class="form-group">
-            <label>Opstelling</label>
-            <div class="setup-grid" id="setup-grid"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Step 3 -->
-    <section class="step">
-      <div class="step-head"><div class="step-num">3</div><h2 class="step-title">Opties &amp; materialen</h2></div>
-      <div class="step-body"><div class="toggle-list" id="options-list"></div></div>
-    </section>
-
-    <!-- Step 4 -->
-    <section class="step">
-      <div class="step-head"><div class="step-num">4</div><h2 class="step-title">Inbouwapparatuur</h2></div>
-      <div class="step-body"><div class="toggle-list" id="appliances-list"></div></div>
-    </section>
-
-    <!-- Step 5 -->
-    <section class="step">
-      <div class="step-head"><div class="step-num">5</div><h2 class="step-title">Kleur, afwerking &amp; sfeer</h2></div>
-      <div class="step-body">
-        <label style="display:block;margin-bottom:.6rem">Kleurpalet</label>
-        <div class="color-grid" id="color-grid"></div>
-        <label style="display:block;margin-bottom:.6rem;margin-top:1rem">Afwerking</label>
-        <div class="finish-row" id="finish-row"></div>
-        <div class="wishes-wrap">
-          <label for="inp-wishes" style="display:block;margin-bottom:.5rem">Extra wensen <span style="font-weight:400;color:var(--text-muted)">(optioneel)</span></label>
-          <textarea id="inp-wishes" maxlength="200" placeholder="Bijv. grote ramen, veel licht, marmer achterwand…"></textarea>
-          <div class="char-count"><span id="char-count">0</span>/200</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Generate -->
-    <div class="generate-wrap">
-      <h3>&#10024; Bekijk uw keukenontwerp</h3>
-      <p>De SVG-tekeningen worden direct gegenereerd. Voor AI-designadvies is een Anthropic API-sleutel nodig (optioneel).</p>
-      <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
-        <button class="btn-generate" id="btn-svg" disabled>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Toon plattegrond &amp; schets
-        </button>
-        <button class="btn-generate" id="btn-generate" disabled style="background:var(--text)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          + AI designadvies
-        </button>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-panel">
-      <div class="sidebar-top">
-        <h2>Uw offerte indicatie</h2>
-        <p>Alle bedragen exclusief BTW, tenzij vermeld</p>
-      </div>
-      <div class="sidebar-body" id="sidebar-body"></div>
-    </div>
-  </aside>
-</div>
-
-<!-- Visualization Section -->
-<div class="viz-section" id="viz-section">
-  <!-- Loading -->
-  <div class="viz-loading" id="viz-loading">
-    <svg class="pencil-svg" width="72" height="72" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="18,82 78,22 88,32 28,92" fill="#C4935A"/>
-      <polygon points="18,82 28,92 14,96 18,82" fill="#E8B87A"/>
-      <polygon points="78,22 88,32 92,18" fill="#D0D0D0"/>
-      <rect x="74" y="18" width="18" height="8" rx="2" transform="rotate(45,83,22)" fill="#E0E0E0"/>
-      <path d="M22,88 Q50,65 78,28" stroke="#C4935A" stroke-width="2.5" fill="none" stroke-dasharray="90" stroke-dashoffset="90" stroke-linecap="round">
-        <animate attributeName="stroke-dashoffset" from="90" to="0" dur="1.4s" repeatCount="indefinite"/>
-      </path>
-    </svg>
-    <div>
-      <div class="loading-text">Uw keukenontwerp wordt samengesteld<span class="loading-dots"></span></div>
-      <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.3rem">Claude AI analyseert uw specificaties</div>
-    </div>
-  </div>
-
-  <!-- Error -->
-  <div class="viz-error" id="viz-error"></div>
-
-  <!-- SVG pair -->
-  <div class="viz-grid" id="viz-grid" style="display:none">
-    <div class="viz-card">
-      <div class="viz-card-head">&#9632; Plattegrond — bovenaanzicht</div>
-      <div class="viz-card-body" id="floorplan-wrap"></div>
-    </div>
-    <div class="viz-card">
-      <div class="viz-card-head">&#9642; Vooraanzicht perspectief</div>
-      <div class="viz-card-body" id="perspective-wrap"></div>
-    </div>
-  </div>
-
-  <!-- Design card -->
-  <div class="design-card" id="design-card" style="display:none">
-    <div class="design-card-head">
-      <h2 id="dc-title">–</h2>
-      <p id="dc-desc">–</p>
-    </div>
-    <div class="design-card-body">
-      <ul class="design-highlights" id="dc-highlights"></ul>
-      <div class="style-advice-box">
-        <strong>Stijladvies van uw ontwerper</strong>
-        <span id="dc-advice">–</span>
-      </div>
-      <div class="prompt-box-wrap">
-        <div class="prompt-box-label">
-          <span>&#128247; Gebruik in Midjourney of DALL·E</span>
-          <button class="btn-copy" id="btn-copy-prompt">Kopieer</button>
-        </div>
-        <textarea class="prompt-textarea" id="dc-prompt" readonly></textarea>
-      </div>
-    </div>
+<!-- Top bar -->
+<div class="topbar">
+  <span class="brand">Keuken<b>Lab</b></span>
+  <div class="api-wrap">
+    <label for="apiKey">Claude API-sleutel:</label>
+    <input type="password" id="apiKey" placeholder="sk-ant-...">
   </div>
 </div>
+
+<!-- Tab bar -->
+<nav class="tabbar">
+  <button class="tabbtn active" onclick="switchTab('offerte',this)">Offerte</button>
+  <button class="tabbtn" onclick="switchTab('prod',this)">Productie</button>
+</nav>
+
+<!-- ══════════════════════ TAB 1: OFFERTE ══════════════════════ -->
+<div id="tab-offerte" class="tabpane active">
+<div class="off-layout">
+<div class="steps-col">
+
+<!-- Step 1 -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge">1</div><h2>Keukenstijl</h2></div>
+  <div class="style-grid" id="styleGrid"></div>
+</div>
+
+<!-- Step 2 -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge">2</div><h2>Afmetingen &amp; indeling</h2></div>
+  <div class="form-row">
+    <div class="fg"><label>Breedte (cm)</label><input type="number" id="inpW" min="150" max="600" value="300" step="10"></div>
+    <div class="fg"><label>Diepte (cm)</label><input type="number" id="inpD" min="50" max="90" value="60" step="5"></div>
+    <div class="fg"><label>Hoogte</label><select id="inpH"><option value="195">195 cm</option><option value="215" selected>215 cm</option><option value="235">235 cm</option></select></div>
+  </div>
+  <div id="warnWidth" class="warn-banner hidden">&#9888; Breedte &gt;450 cm – controleer leveringsmogelijkheden en montageruimte.</div>
+  <div style="margin-top:1rem">
+    <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.65rem">Indeling</div>
+    <div class="layout-grid" id="layoutGrid"></div>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge">3</div><h2>Opties &amp; accessoires</h2></div>
+  <div class="opt-grid" id="optGrid"></div>
+</div>
+
+<!-- Step 4 -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge">4</div><h2>Apparatuur</h2></div>
+  <div class="appl-grid" id="applGrid"></div>
+  <div style="margin-top:1rem" id="posWrap">
+    <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem">Positionering</div>
+    <div class="pos-grid" id="posGrid"></div>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge">5</div><h2>Kleur, afwerking &amp; wensen</h2></div>
+  <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.5rem">Kleur</div>
+  <div class="color-row" id="colorRow"></div>
+  <div id="colorLabel" style="font-size:.83rem;color:var(--char-lt);margin-bottom:.875rem"></div>
+  <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.5rem">Afwerking</div>
+  <div class="finish-row" id="finishRow"></div>
+  <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.5rem">Bijzondere wensen</div>
+  <textarea class="wishes-ta" id="wishesTA" maxlength="200" placeholder="Beschrijf uw bijzondere wensen..."></textarea>
+  <div class="char-count"><span id="charCt">0</span>/200</div>
+</div>
+
+<!-- Floor plan -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge" style="background:var(--char-lt)">&#9632;</div><h2>Plattegrond</h2></div>
+  <div class="fp-wrap">
+    <svg id="fpSvg" viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<!-- AI Viz -->
+<div class="card">
+  <div class="card-hd"><div class="step-badge" style="background:linear-gradient(135deg,#5B4FD4,#8B3FC4)">AI</div><h2>AI Ontwerp visualisatie</h2></div>
+  <p style="font-size:.84rem;color:#666;margin-bottom:.65rem">Genereer een AI-beschrijving van uw keukenontwerp op basis van uw configuratie.</p>
+  <button class="ai-btn" id="aiBtn" onclick="runAIViz()">&#10024; Genereer AI visualisatie</button>
+  <div class="ai-result" id="aiResult"></div>
+</div>
+
+</div><!-- end steps-col -->
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sb-card">
+    <h3>Offerte overzicht</h3>
+    <div id="sbLines"></div>
+    <div class="sb-meta" id="sbMeta"></div>
+    <button class="cta-btn" onclick="reqOfferte()">Offerte aanvragen</button>
+  </div>
+</div>
+
+</div><!-- off-layout -->
+</div><!-- tab-offerte -->
+
+<!-- ══════════════════════ TAB 2: PRODUCTIE ══════════════════════ -->
+<div id="tab-prod" class="tabpane">
+<div class="prod-wrap">
+
+  <div class="acc" id="acc-A">
+    <div class="acc-hd open" onclick="togAcc('acc-A')"><div class="acc-hd-left"><span class="acc-badge">2A</span>Kastenoverzicht</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-A-body"><div class="tbl-wrap" id="cabTbl"></div></div>
+  </div>
+
+  <div class="acc" id="acc-B">
+    <div class="acc-hd open" onclick="togAcc('acc-B')"><div class="acc-hd-left"><span class="acc-badge">2B</span>Delenlijst</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-B-body">
+      <div class="tbl-wrap" id="partsTbl"></div>
+      <button class="btn-exp" onclick="exportCSV()">&#8595; CSV exporteren</button>
+    </div>
+  </div>
+
+  <div class="acc" id="acc-C">
+    <div class="acc-hd open" onclick="togAcc('acc-C')"><div class="acc-hd-left"><span class="acc-badge">2C</span>Plaat optimalisatie</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-C-body"><div id="platesWrap"></div></div>
+  </div>
+
+  <div class="acc" id="acc-D">
+    <div class="acc-hd open" onclick="togAcc('acc-D')"><div class="acc-hd-left"><span class="acc-badge">2D</span>Kantenbanden</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-D-body">
+      <div class="tbl-wrap" id="edgeTbl"></div>
+      <div id="edgeWarn" class="amber-warn hidden">&#9888; Totaal &gt;500 m – overweeg extra kantenbandvoorraad.</div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc-E">
+    <div class="acc-hd open" onclick="togAcc('acc-E')"><div class="acc-hd-left"><span class="acc-badge">2E</span>CNC bewerkingstijd</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-E-body">
+      <div class="tbl-wrap" id="cncTbl"></div>
+      <svg id="cncChart" height="54"></svg>
+      <div id="cncSum"></div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc-F">
+    <div class="acc-hd open" onclick="togAcc('acc-F')"><div class="acc-hd-left"><span class="acc-badge">2F</span>Xilog Plus export</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-F-body">
+      <pre class="xilog-pre" id="xilogPre"></pre>
+      <button class="btn-exp" onclick="dlXilog()">&#8595; Download .xil bestand</button>
+    </div>
+  </div>
+
+  <div class="acc" id="acc-G">
+    <div class="acc-hd open" onclick="togAcc('acc-G')"><div class="acc-hd-left"><span class="acc-badge">2G</span>Materiaaloverzicht</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-G-body">
+      <div class="tbl-wrap" id="matTbl"></div>
+      <div class="stat-grid" id="matStats"></div>
+      <button class="print-btn" onclick="window.print()">&#128438; Afdrukken</button>
+    </div>
+  </div>
+
+</div><!-- prod-wrap -->
+</div><!-- tab-prod -->
 
 <script>
-'use strict';
-
-/* ════════════════════════════════════
-   DATA
-════════════════════════════════════ */
-const STYLES = [
-  {id:'modern',    name:'Modern',     icon:'◻', desc:'Strak, minimalistisch en tijdloos',  price:2800, delivery:[8,10]},
-  {id:'landelijk', name:'Landelijk',  icon:'⌂', desc:'Warm, gezellig en authentiek',       price:2400, delivery:[6,8]},
-  {id:'klassiek',  name:'Klassiek',   icon:'✦', desc:'Elegant, verfijnd en duurzaam',      price:3200, delivery:[10,12]},
-  {id:'industrieel',name:'Industrieel',icon:'⚙',desc:'Ruw, stoer en karaktervol',          price:2600, delivery:[8,10]},
-];
-const HEIGHTS = [195, 215, 235];
-const SETUPS = [
-  {id:'recht',  name:'Recht',   desc:'Eén rechte wand',      surcharge:0},
-  {id:'hoek',   name:'Hoek',    desc:'L-vormige opstelling',  surcharge:0},
-  {id:'eiland', name:'Eiland',  desc:'Met vrijstaand eiland', surcharge:2800},
-  {id:'u-vorm', name:'U-vorm',  desc:'Drie wanden',           surcharge:1900},
-];
-const OPTIONS = [
-  {id:'softclose',name:'Soft-close scharnieren',  desc:'Zachte, geluidloze sluitwerking',          price:480,  incompatible:[],                 cornerOnly:false, recommended:[]},
-  {id:'quartz',   name:'Quartz werkblad',          desc:'Onderhoudsvriendelijk en duurzaam',        price:1200, incompatible:['graniet','hout'], cornerOnly:false, recommended:['modern','industrieel']},
-  {id:'graniet',  name:'Graniet werkblad',          desc:'Natuursteen met uniek patroon',            price:1800, incompatible:['quartz','hout'],  cornerOnly:false, recommended:['klassiek']},
-  {id:'hout',     name:'Massief houten werkblad',   desc:'Warm en natuurlijk karakter',              price:950,  incompatible:['quartz','graniet'],cornerOnly:false, recommended:['landelijk']},
-  {id:'led',      name:'LED onderbouwverlichting',  desc:'Sfeervolle werkverlichting onder kasten',  price:320,  incompatible:[],                 cornerOnly:false, recommended:[]},
-  {id:'ladeorg',  name:'Ladeorganisatie systeem',   desc:'Slimme en stijlvolle opbergoplossing',     price:560,  incompatible:[],                 cornerOnly:false, recommended:[]},
-  {id:'pushopen', name:'Push-to-open deuren',       desc:'Greeploos, strak design',                  price:740,  incompatible:['grepen'],         cornerOnly:false, recommended:['modern','industrieel']},
-  {id:'grepen',   name:'Design grepen RVS',         desc:'Hoogwaardig roestvrij stalen grepen',      price:380,  incompatible:['pushopen'],       cornerOnly:false, recommended:['klassiek','landelijk']},
-  {id:'carrousel',name:'Carrousel hoekoplossing',   desc:'Optimaal gebruik van hoekruimte',          price:680,  incompatible:[],                 cornerOnly:true,  recommended:[]},
-];
-const APPLIANCES = [
-  {id:'oven',      name:'Inbouwoven',         desc:'Multifunctionele inbouwoven',        price:890,  incompatible:['stoomoven']},
-  {id:'inductie',  name:'Inductiekookplaat',  desc:'Energiezuinig en razendsnel',        price:680,  incompatible:[]},
-  {id:'vaatwasser',name:'Vaatwasser',         desc:'Geïntegreerde inbouw vaatwasser',   price:740,  incompatible:[]},
-  {id:'koelkast',  name:'Inbouwkoelkast',     desc:'Naadloos geïntegreerde koeling',    price:820,  incompatible:[]},
-  {id:'afzuigkap', name:'Afzuigkap',          desc:'Effectieve en stijlvolle afzuiging',price:620,  incompatible:[]},
-  {id:'stoomoven', name:'Combi-stoomoven',    desc:'Combi stoom- en convectie-oven',    price:1480, incompatible:['oven']},
-];
-const COLORS = [
-  {id:'wit',        name:'Wit',          hex:'#F4F2ED', dark:false},
-  {id:'antraciet',  name:'Antraciet',    hex:'#3C3C3C', dark:true},
-  {id:'naturel',    name:'Naturel hout', hex:'#C4935A', dark:false},
-  {id:'donkerhout', name:'Donker hout',  hex:'#5C3D1E', dark:true},
-  {id:'saliegroen', name:'Saliegroen',   hex:'#7A9E7E', dark:false},
-  {id:'navy',       name:'Navy blauw',   hex:'#2C3E6B', dark:true},
-];
-const FINISHES = [
-  {id:'mat',       name:'Mat',       desc:'Vingerafdrukvrij & stijlvol'},
-  {id:'hoogglans', name:'Hoogglans', desc:'Helder en ruimtelijk effect'},
-  {id:'houtnerf',  name:'Houtnerf',  desc:'Warme, natuurlijke uitstraling'},
-];
-
-/* ════════════════════════════════════
-   STATE
-════════════════════════════════════ */
-const state = {
-  apiKey:'', style:null, width:'', depth:'',
-  height:215, setup:'recht',
-  options:new Set(), appliances:new Set(),
-  color:null, finish:null, wishes:'',
+/* ═══════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════ */
+const CONFIG = {
+  PLATE_W:2800, PLATE_H:2070, PLATE_THICKNESS:18, PLATE_PRICE:300,
+  EDGEBAND_ROLL_M:100, EDGEBAND_ROLL_PRICE:200, KERF:4,
+  CABINET_DEPTH_OFFSET:2, BASE_CABINET_H:720,
+  CNC_SETUP:5, CNC_FEED:8, CNC_REPOS:0.5, CNC_DRILL:0.25,
+  CNC_EDGEBAND:1.2, CNC_ASSEMBLY:2
 };
 
-/* ════════════════════════════════════
-   HELPERS
-════════════════════════════════════ */
-const eur = n => '€\u202F' + n.toLocaleString('nl-NL',{minimumFractionDigits:0,maximumFractionDigits:0});
-const getStyle  = () => STYLES.find(s => s.id === state.style) || null;
-const getSetup  = () => SETUPS.find(s => s.id === state.setup);
-const isCorner  = () => state.setup === 'hoek' || state.setup === 'u-vorm';
+/* ═══════════════════════════════════════════════
+   STATIC DATA
+═══════════════════════════════════════════════ */
+const STYLES = [
+  {id:'modern',  name:'Modern',    price:2800, weeks:'8–10 wk', swatch:'linear-gradient(135deg,#E8E8E8,#C0C0C0)', icon:'▫'},
+  {id:'landelijk',name:'Landelijk',price:2400, weeks:'6–8 wk',  swatch:'linear-gradient(135deg,#D4B896,#A8876A)', icon:'⌂'},
+  {id:'klassiek',name:'Klassiek',  price:3200, weeks:'10–12 wk',swatch:'linear-gradient(135deg,#F5F0E8,#D8CCBA)', icon:'◈'},
+  {id:'industrieel',name:'Industrieel',price:2600,weeks:'8–10 wk',swatch:'linear-gradient(135deg,#5A5A5A,#3A3A3A)',icon:'◆'}
+];
 
-function disabledOptReason(opt) {
-  for (const id of opt.incompatible) {
-    if (state.options.has(id)) {
-      const b = OPTIONS.find(o => o.id === id);
-      return b ? `Niet combineerbaar met "${b.name}"` : 'Niet combineerbaar';
+const LAYOUTS = [
+  {id:'recht',  name:'Recht',   surcharge:0,    svgPath:'M20 70 L100 70'},
+  {id:'hoek',   name:'Hoek',    surcharge:0,    svgPath:'M20 70 L70 70 L70 20'},
+  {id:'eiland', name:'Eiland',  surcharge:2800, svgPath:'M10 60 L110 60 M30 80 L90 80'},
+  {id:'u-vorm', name:'U-vorm',  surcharge:1900, svgPath:'M15 70 L55 70 L55 20 M65 20 L65 70 L105 70'}
+];
+
+const OPTIONS = [
+  {id:'softclose', name:'Soft-close scharnieren', price:480,  excl:[], note:'Demping voor alle deuren'},
+  {id:'quartz',    name:'Quartz werkblad',         price:1200, excl:['graniet','hout'], note:'Excl. graniet/hout'},
+  {id:'graniet',   name:'Graniet werkblad',        price:1800, excl:['quartz','hout'],  note:'Excl. quartz/hout'},
+  {id:'hout',      name:'Massief hout werkblad',   price:950,  excl:['quartz','graniet'],note:'Excl. quartz/graniet'},
+  {id:'led',       name:'LED verlichting',         price:320,  excl:[], note:'Onderkast LED strips'},
+  {id:'ladeorg',   name:'Lade organisatie',        price:560,  excl:[], note:'Bamboe inleggers'},
+  {id:'pushopen',  name:'Push-to-open',            price:740,  excl:['grepen'], note:'Excl. grepen'},
+  {id:'grepen',    name:'Designgrepen',            price:380,  excl:['pushopen'], note:'Excl. push-to-open'},
+  {id:'carrousel', name:'Carrousel hoekoplossing', price:680,  excl:[], note:'Alleen bij hoek/U-vorm', cornerOnly:true}
+];
+
+const APPLIANCES = [
+  {id:'oven',       name:'Inbouw oven',       price:890,  excl:['stoomoven'], icon:'▭'},
+  {id:'inductie',   name:'Inductiekookplaat', price:680,  excl:[], icon:'◉'},
+  {id:'vaatwasser', name:'Vaatwasser',        price:740,  excl:[], icon:'≋'},
+  {id:'koelkast',   name:'Koel-vriescombinatie',price:820,excl:[], icon:'❄'},
+  {id:'afzuigkap',  name:'Afzuigkap',         price:620,  excl:[], icon:'↑'},
+  {id:'stoomoven',  name:'Stoomoven',         price:1480, excl:['oven'], icon:'☁'}
+];
+
+const COLORS = [
+  {id:'wit',     name:'Wit',          hex:'#F5F5F5'},
+  {id:'antraciet',name:'Antraciet',   hex:'#3A3A3A'},
+  {id:'naturel', name:'Naturel hout', hex:'#C4935A'},
+  {id:'donker',  name:'Donker hout',  hex:'#5C3D1E'},
+  {id:'salige',  name:'Saliegroen',   hex:'#7A9E7E'},
+  {id:'navy',    name:'Navy blauw',   hex:'#2B3A67'}
+];
+
+const FINISHES = [
+  {id:'mat',      name:'Mat'},
+  {id:'hoogglans',name:'Hoogglans'},
+  {id:'houtnerf', name:'Houtnerf'}
+];
+
+const APPL_POSITIONS = {
+  inductie:  {label:'Kookplaat positie',  opts:['Links','Midden','Rechts']},
+  vaatwasser:{label:'Vaatwasser positie', opts:['Links van spoelbak','Rechts van spoelbak']},
+  koelkast:  {label:'Koelkast positie',   opts:['Linker uiteinde','Rechter uiteinde']},
+  oven:      {label:'Oven positie',       opts:['Zelfde als koelkast']},
+  stoomoven: {label:'Stoomoven positie',  opts:['Zelfde als koelkast']}
+};
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const state = {
+  style:   'modern',
+  width:   300,
+  depth:   60,
+  height:  215,
+  layout:  'recht',
+  options: new Set(),
+  appliances: new Set(),
+  appliancePos: {},
+  color:   'wit',
+  finish:  'mat',
+  wishes:  '',
+  // derived
+  cabinets: [],
+  parts:    [],
+  plates:   [],
+  edgeBanding: [],
+  cncTime:  {},
+  xilogCode:'',
+  // sort
+  cabSort: {col:'id',asc:true},
+  partsSort:{col:'id',asc:true}
+};
+
+/* ═══════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════ */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tabbtn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════
+   ACCORDION
+═══════════════════════════════════════════════ */
+function togAcc(id) {
+  const hd   = document.querySelector('#'+id+' .acc-hd');
+  const body = document.getElementById(id+'-body');
+  const isOpen = hd.classList.contains('open');
+  if (isOpen) {
+    hd.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    hd.classList.add('open');
+    body.style.display = '';
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER STATIC UI
+═══════════════════════════════════════════════ */
+function initUI() {
+  // Style grid
+  const sg = document.getElementById('styleGrid');
+  sg.innerHTML = STYLES.map(s => `
+    <div class="style-card ${state.style===s.id?'sel':''}" onclick="selStyle('${s.id}')">
+      <div class="swatch" style="background:${s.swatch}"></div>
+      <div class="sname">${s.name}</div>
+      <div class="sprice">€${s.price.toLocaleString('nl')}/m</div>
+      <div class="sweeks">${s.weeks}</div>
+    </div>`).join('');
+
+  // Layout grid
+  const lg = document.getElementById('layoutGrid');
+  lg.innerHTML = LAYOUTS.map(l => `
+    <div class="lay-card ${state.layout===l.id?'sel':''}" onclick="selLayout('${l.id}')">
+      <svg width="120" height="80" viewBox="0 0 120 90">${renderLayoutSVG(l)}</svg>
+      <div class="lname">${l.name}</div>
+      <div class="lsurch">${l.surcharge>0?'+€'+l.surcharge.toLocaleString('nl'):''}</div>
+    </div>`).join('');
+
+  // Options
+  renderOptions();
+
+  // Appliances
+  renderAppliances();
+
+  // Colors
+  const cr = document.getElementById('colorRow');
+  cr.innerHTML = COLORS.map(c => `
+    <div class="cswatch ${state.color===c.id?'sel':''}" style="background:${c.hex}" title="${c.name}" onclick="selColor('${c.id}')"></div>`).join('');
+  updateColorLabel();
+
+  // Finish
+  const fr = document.getElementById('finishRow');
+  fr.innerHTML = FINISHES.map(f => `
+    <button class="fin-btn ${state.finish===f.id?'sel':''}" onclick="selFinish('${f.id}')">${f.name}</button>`).join('');
+}
+
+function renderLayoutSVG(l) {
+  const stroke = 'stroke="#2C2825" stroke-width="3" stroke-linecap="round" fill="none"';
+  const paths = {
+    recht:   `<line x1="15" y1="60" x2="105" y2="60" ${stroke}/>`,
+    hoek:    `<polyline points="15,75 15,25 105,25" ${stroke}/>`,
+    eiland:  `<line x1="10" y1="55" x2="110" y2="55" ${stroke}/><line x1="30" y1="72" x2="90" y2="72" ${stroke}/>`,
+    'u-vorm':`<polyline points="15,75 15,25 105,25 105,75" ${stroke}/>`
+  };
+  return paths[l.id] || '';
+}
+
+function renderOptions() {
+  const isCorner = ['hoek','u-vorm'].includes(state.layout);
+  const og = document.getElementById('optGrid');
+  og.innerHTML = OPTIONS.map(o => {
+    const disabled = isDisabledOpt(o);
+    const selected = state.options.has(o.id);
+    const cornerOnly = o.cornerOnly && !isCorner;
+    const cls = [selected?'sel':'', (disabled||cornerOnly)?'disabled':''].join(' ');
+    return `<div class="opt-card ${cls}" onclick="toggleOpt('${o.id}')">
+      <div class="opt-chk"></div>
+      <div>
+        <div class="opt-name">${o.name}</div>
+        <div class="opt-price">€${o.price.toLocaleString('nl')}</div>
+        <div class="opt-note">${o.note}${cornerOnly?' (alleen hoek/U-vorm)':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function isDisabledOpt(o) {
+  return o.excl.some(e => state.options.has(e));
+}
+
+function renderAppliances() {
+  const ag = document.getElementById('applGrid');
+  ag.innerHTML = APPLIANCES.map(a => {
+    const disabled = a.excl.some(e => state.appliances.has(e));
+    const selected = state.appliances.has(a.id);
+    const cls = [selected?'sel':'', disabled?'disabled':''].join(' ');
+    return `<div class="opt-card ${cls}" onclick="toggleAppl('${a.id}')">
+      <div class="opt-chk"></div>
+      <div>
+        <div class="opt-name">${a.name}</div>
+        <div class="opt-price">€${a.price.toLocaleString('nl')}</div>
+        ${disabled?`<div class="opt-note">${a.excl.map(e=>APPLIANCES.find(x=>x.id===e)?.name||e).join(', ')} excl.</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  renderPositions();
+}
+
+function renderPositions() {
+  const pg = document.getElementById('posGrid');
+  const relevant = Object.entries(APPL_POSITIONS).filter(([id])=>state.appliances.has(id));
+  if (!relevant.length) { pg.innerHTML = '<span style="font-size:.83rem;color:#999">Selecteer apparatuur hierboven.</span>'; return; }
+  pg.innerHTML = relevant.map(([id,cfg])=>`
+    <div class="fg">
+      <label>${cfg.label}</label>
+      <select onchange="setPos('${id}',this.value)">
+        ${cfg.opts.map(o=>`<option ${state.appliancePos[id]===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════
+   SELECTION HANDLERS
+═══════════════════════════════════════════════ */
+function selStyle(id) {
+  state.style = id;
+  document.querySelectorAll('.style-card').forEach((c,i)=>c.classList.toggle('sel',STYLES[i].id===id));
+  recalculate();
+}
+function selLayout(id) {
+  state.layout = id;
+  document.querySelectorAll('.lay-card').forEach((c,i)=>c.classList.toggle('sel',LAYOUTS[i].id===id));
+  renderOptions(); recalculate();
+}
+function toggleOpt(id) {
+  const o = OPTIONS.find(x=>x.id===id);
+  if (!o) return;
+  if (isDisabledOpt(o)) return;
+  if (o.cornerOnly && !['hoek','u-vorm'].includes(state.layout)) return;
+  if (state.options.has(id)) {
+    state.options.delete(id);
+  } else {
+    o.excl.forEach(e=>state.options.delete(e));
+    state.options.add(id);
+  }
+  renderOptions(); recalculate();
+}
+function toggleAppl(id) {
+  const a = APPLIANCES.find(x=>x.id===id);
+  if (!a) return;
+  if (a.excl.some(e=>state.appliances.has(e))) return;
+  if (state.appliances.has(id)) {
+    state.appliances.delete(id);
+    delete state.appliancePos[id];
+  } else {
+    a.excl.forEach(e=>{state.appliances.delete(e);delete state.appliancePos[e];});
+    state.appliances.add(id);
+  }
+  renderAppliances(); recalculate();
+}
+function setPos(id,val) { state.appliancePos[id]=val; recalculate(); }
+function selColor(id) {
+  state.color = id;
+  document.querySelectorAll('.cswatch').forEach((c,i)=>c.classList.toggle('sel',COLORS[i].id===id));
+  updateColorLabel(); recalculate();
+}
+function updateColorLabel() {
+  const c = COLORS.find(x=>x.id===state.color);
+  document.getElementById('colorLabel').textContent = c ? c.name : '';
+}
+function selFinish(id) {
+  state.finish = id;
+  document.querySelectorAll('.fin-btn').forEach((b,i)=>b.classList.toggle('sel',FINISHES[i].id===id));
+  recalculate();
+}
+
+/* ═══════════════════════════════════════════════
+   DERIVE CABINETS
+═══════════════════════════════════════════════ */
+function deriveCabinets() {
+  const W  = state.width * 10;   // mm
+  const D  = state.depth * 10;
+  const H  = state.height * 10;
+  const cabD = D - CONFIG.CABINET_DEPTH_OFFSET;
+  const MODULE = 600;
+  const applCount = state.appliances.size;
+
+  let cabinets = [];
+  let id = 1;
+
+  function pushBase(w, notes='') {
+    cabinets.push({id:'B'+String(id++).padStart(2,'0'), type:'Base', W:w, D:cabD, H:CONFIG.BASE_CABINET_H, notes});
+  }
+  function pushTall(w, notes='') {
+    cabinets.push({id:'T'+String(id++).padStart(2,'0'), type:'Tall', W:w, D:cabD, H:H, notes});
+  }
+
+  // Tall cabinets for appliances
+  const tallAppl = ['oven','koelkast','stoomoven'];
+  tallAppl.forEach(aId => {
+    if (state.appliances.has(aId)) {
+      const a = APPLIANCES.find(x=>x.id===aId);
+      pushTall(MODULE, a.name);
     }
-  }
-  return null;
-}
-function disabledAppReason(app) {
-  for (const id of app.incompatible) {
-    if (state.appliances.has(id)) {
-      const b = APPLIANCES.find(a => a.id === id);
-      return b ? `Niet combineerbaar met "${b.name}"` : 'Niet combineerbaar';
-    }
-  }
-  return null;
-}
-function widthStatus() {
-  const v = parseFloat(state.width);
-  if (!state.width) return 'empty';
-  if (v < 150) return 'low';
-  if (v > 600) return 'high';
-  return 'ok';
-}
-const dimsOk = () => widthStatus() === 'ok';
+  });
 
-function calculate() {
-  const style = getStyle(), w = parseFloat(state.width)||0, setup = getSetup();
-  const base  = style ? (w/100)*style.price : 0;
-  const setupExtra = setup ? setup.surcharge : 0;
-  let optTotal = 0;
-  for (const id of state.options) { const o = OPTIONS.find(x=>x.id===id); if(o) optTotal+=o.price; }
-  let appTotal = 0;
-  for (const id of state.appliances) { const a = APPLIANCES.find(x=>x.id===id); if(a) appTotal+=a.price; }
-  const sub = base+setupExtra+optTotal+appTotal, vat = sub*0.21;
-  return {base,setupExtra,optTotal,appTotal,sub,vat,total:sub+vat};
-}
-function getDelivery() {
-  const s = getStyle(); if(!s) return null;
-  const extra = state.options.size;
-  return `${s.delivery[0]+extra}–${s.delivery[1]+extra} weken`;
-}
+  // Dishwasher = base slot
+  if (state.appliances.has('vaatwasser')) pushBase(MODULE,'Vaatwasser');
 
-/* ════════════════════════════════════
-   SVG COLORS
-════════════════════════════════════ */
-function getStyleColors() {
-  const map = {
-    'wit':        {cab:'#F0EEE8',cabinetStroke:'#C8C4BA',wt:'#D4CCC0',wall:'#E8E4DC'},
-    'antraciet':  {cab:'#454545',cabinetStroke:'#282828',wt:'#7A7A7A',wall:'#F0EBE0'},
-    'naturel':    {cab:'#C4935A',cabinetStroke:'#8B6342',wt:'#E0B080',wall:'#F0EBE0'},
-    'donkerhout': {cab:'#5C3D1E',cabinetStroke:'#3A2510',wt:'#7A5030',wall:'#F0EBE0'},
-    'saliegroen': {cab:'#7A9E7E',cabinetStroke:'#4A6E4E',wt:'#C8BF98',wall:'#F0EBE0'},
-    'navy':       {cab:'#2C3E6B',cabinetStroke:'#1A2540',wt:'#C0B8A8',wall:'#F0EBE0'},
-  };
-  const styleDef = {modern:'antraciet',landelijk:'naturel',klassiek:'saliegroen',industrieel:'antraciet'};
-  const key = state.color || (state.style ? styleDef[state.style] : 'wit');
-  return map[key] || map['wit'];
-}
+  // Remaining width for standard cabinets
+  let usedW = cabinets.reduce((s,c)=>s+c.W,0);
+  let remW  = W - usedW;
 
-/* ════════════════════════════════════
-   SVG FLOOR PLAN
-════════════════════════════════════ */
-function buildFloorPlan() {
-  const w = parseFloat(state.width)||300;
-  const d = parseFloat(state.depth)||60;
-  const setup = state.setup;
-  const C = getStyleColors();
-  const SW=480, SH=340, M=52;
-  const AW=SW-M*2, AH=SH-M*2;
-  const retLen = Math.round(w*0.38);
+  const nModules = Math.floor(remW / MODULE);
+  const leftover = remW - nModules * MODULE;
 
-  let boxW,boxH;
-  if(setup==='recht'){boxW=w;boxH=d+w*0.38;}
-  else if(setup==='hoek'){boxW=w;boxH=retLen+d*1.2;}
-  else if(setup==='eiland'){boxW=w;boxH=d*4;}
-  else{boxW=w;boxH=retLen+d*1.3;}
+  for (let i=0; i<nModules; i++) pushBase(MODULE);
 
-  const sc  = Math.min(AW/boxW,AH/boxH);
-  const ox  = M+(AW-boxW*sc)/2;
-  const oy  = M+(AH-boxH*sc)/2;
-  const px  = cm => cm*sc;
-
-  const cabRect=(x,y,cw,ch)=>{
-    x=+x.toFixed(1);y=+y.toFixed(1);cw=+cw.toFixed(1);ch=+ch.toFixed(1);
-    return `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.5" rx="2"/>
-    <rect x="${x+2}" y="${y+2}" width="${cw-4}" height="${ch-4}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".6" opacity=".45" rx="1"/>`;
-  };
-  const wtRect=(x,y,cw,ch)=>`<rect x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" width="${(+cw).toFixed(1)}" height="${(+ch).toFixed(1)}" fill="${C.wt}" rx="1" opacity=".9"/>`;
-  const wallRect=(x,y,cw,ch)=>`<rect x="${(x-2).toFixed(1)}" y="${(y-2).toFixed(1)}" width="${(cw+4).toFixed(1)}" height="${(ch+4).toFixed(1)}" fill="#3A2E22" rx="1"/>`;
-  const dim=(x1,y1,x2,y2,lbl,rot=0)=>{
-    const mx=(x1+x2)/2, my=(y1+y2)/2;
-    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#9A8A7A" stroke-width=".8" stroke-dasharray="3,2"/>
-    <text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="9.5" fill="#7A6E5D" transform="rotate(${rot},${mx.toFixed(1)},${my.toFixed(1)})">${lbl}</text>`;
-  };
-
-  const cD=px(d), kW=px(w), rL=px(retLen), wts=Math.max(4,cD*.12);
-  let els='';
-
-  if(setup==='recht'){
-    els+=wallRect(ox,oy,kW,cD);
-    els+=cabRect(ox,oy,kW,cD*.87);
-    els+=wtRect(ox,oy+cD*.87,kW,wts);
-    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
-    els+=dim(ox-30,oy,ox-30,oy+cD,`${d} cm`,-90);
-  } else if(setup==='hoek'){
-    els+=wallRect(ox,oy,kW,cD);
-    els+=cabRect(ox,oy,kW,cD*.87);
-    els+=wtRect(ox,oy+cD*.87,kW,wts);
-    els+=wallRect(ox,oy,cD,rL);
-    els+=cabRect(ox,oy,cD*.87,rL);
-    els+=wtRect(ox+cD*.87,oy,wts,rL);
-    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
-    els+=dim(ox-30,oy,ox-30,oy+rL,`${retLen} cm`,-90);
-  } else if(setup==='eiland'){
-    const iW=px(Math.round(w*.45)), iD=px(80), iX=ox+(kW-iW)/2, iY=oy+cD+px(70);
-    els+=wallRect(ox,oy,kW,cD);
-    els+=cabRect(ox,oy,kW,cD*.87);
-    els+=wtRect(ox,oy+cD*.87,kW,wts);
-    els+=cabRect(iX,iY,iW,iD*.87);
-    els+=wtRect(iX,iY+iD*.87,iW,wts);
-    els+=`<text x="${(iX+iW/2).toFixed(1)}" y="${(iY+iD*.45).toFixed(1)}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="${C.cabinetStroke}" opacity=".7">Eiland</text>`;
-    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
-    els+=dim(iX,iY+iD+12,iX+iW,iY+iD+12,`${Math.round(w*.45)} cm`);
-  } else { // u-vorm
-    els+=wallRect(ox,oy,kW,cD);
-    els+=cabRect(ox,oy,kW,cD*.87);
-    els+=wtRect(ox,oy+cD*.87,kW,wts);
-    els+=wallRect(ox,oy,cD,rL);
-    els+=cabRect(ox,oy,cD*.87,rL);
-    els+=wtRect(ox+cD*.87,oy,wts,rL);
-    const rx2=ox+kW-cD;
-    els+=wallRect(rx2,oy,cD,rL);
-    els+=cabRect(rx2+cD*.13,oy,cD*.87,rL);
-    els+=wtRect(rx2,oy,wts,rL);
-    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
-    els+=dim(ox-30,oy,ox-30,oy+rL,`${retLen} cm`,-90);
+  if (leftover >= 300) {
+    pushBase(leftover, 'Smal aanvulkast');
+  } else if (leftover > 0 && cabinets.length > 0) {
+    // distribute among last few base cabinets
+    const baseCabs = cabinets.filter(c=>c.type==='Base'&&!c.notes);
+    const distribute = Math.round(leftover / Math.max(1,baseCabs.length));
+    baseCabs.forEach(c => { c.W += distribute; });
   }
 
-  // Appliance icons in cabinet area
-  if(state.appliances.has('inductie')||state.appliances.has('oven')){
-    const ax=ox+kW*.5-px(25), ay=oy+cD*.25;
-    els+=`<rect x="${ax.toFixed(1)}" y="${ay.toFixed(1)}" width="${px(50).toFixed(1)}" height="${px(35).toFixed(1)}" fill="#222" rx="2" opacity=".55"/>`;
-    if(state.appliances.has('inductie')){
-      [[.25,.3],[.75,.3],[.25,.7],[.75,.7]].forEach(([rx,ry])=>{
-        els+=`<circle cx="${(ax+px(50)*rx).toFixed(1)}" cy="${(ay+px(35)*ry).toFixed(1)}" r="${Math.max(3,px(5.5)).toFixed(1)}" fill="none" stroke="#666" stroke-width="1.4"/>`;
-      });
+  // For U-vorm add second run
+  if (state.layout === 'u-vorm') {
+    const sideW = Math.round(W * 0.4);
+    const nSide = Math.floor(sideW / MODULE);
+    for (let i=0;i<nSide;i++) pushBase(MODULE,'Zijvleugel');
+  }
+  if (state.layout === 'hoek') {
+    pushBase(MODULE,'Hoekoplossing');
+  }
+  if (state.layout === 'eiland') {
+    const islandW = Math.min(W*10, 2400);
+    const ni = Math.floor(islandW/MODULE);
+    for(let i=0;i<ni;i++) pushBase(MODULE,'Eiland');
+  }
+
+  state.cabinets = cabinets;
+}
+
+/* ═══════════════════════════════════════════════
+   DERIVE PARTS
+═══════════════════════════════════════════════ */
+function deriveParts() {
+  const parts = [];
+  let pid = 1;
+
+  state.cabinets.forEach(cab => {
+    const {W, D, H, type, id} = cab;
+    const isTall = type === 'Tall';
+    const fullH  = H;
+    const baseH  = CONFIG.BASE_CABINET_H;
+
+    if (isTall) {
+      // 2× Side D×fullH
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Zijwand', qty:2, W:D,  H:fullH});
+      // 1× Bottom (W-36)×D
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Bodem',   qty:1, W:W-36, H:D});
+      // 1× Top (W-36)×D
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Blad',    qty:1, W:W-36, H:D});
+      // 2× Middle shelf (W-36)×(D-18)
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Middentablaar', qty:2, W:W-36, H:D-18});
     } else {
-      els+=`<rect x="${(ax+px(8)).toFixed(1)}" y="${(ay+px(5)).toFixed(1)}" width="${px(34).toFixed(1)}" height="${px(25).toFixed(1)}" fill="none" stroke="#555" stroke-width="1" rx="1"/>`;
+      // Base: 2× Side D×720
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Zijwand', qty:2, W:D,    H:baseH});
+      // 1× Bottom (W-36)×D
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Bodem',   qty:1, W:W-36, H:D});
+      // 2× Top rail (W-36)×96
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Dwarsligger', qty:2, W:W-36, H:96});
+      // 1× Shelf (W-36)×(D-18)
+      parts.push({id:'P'+String(pid++).padStart(3,'0'), cabId:id, desc:'Tussenbord', qty:1, W:W-36, H:D-18});
     }
-  }
+  });
 
-  // Legend
-  els+=`<rect x="10" y="${SH-28}" width="11" height="9" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1" rx="1"/>
-  <text x="24" y="${SH-21}" font-family="DM Sans,sans-serif" font-size="9" fill="#7A6E5D">Kasten</text>
-  <rect x="68" y="${SH-28}" width="11" height="9" fill="${C.wt}" rx="1"/>
-  <text x="82" y="${SH-21}" font-family="DM Sans,sans-serif" font-size="9" fill="#7A6E5D">Werkblad</text>`;
+  // Aggregate identical parts
+  const agg = [];
+  parts.forEach(p => {
+    const key = `${p.desc}|${p.W}|${p.H}`;
+    const ex = agg.find(x=>`${x.desc}|${x.W}|${x.H}` === key);
+    if (ex) { ex.qty += p.qty; }
+    else     { agg.push({...p}); }
+  });
 
-  return `<svg width="${SW}" height="${SH}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${SW}" height="${SH}" fill="#EDE8DC" rx="10"/>
-  <rect x="${M-8}" y="${M-8}" width="${AW+16}" height="${AH+16}" fill="#F5F0E6" rx="7"/>
-  <text x="${SW/2}" y="18" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">schaal ±1:${Math.max(1,Math.round(1/sc))} &nbsp;·&nbsp; bovenaanzicht</text>
-  ${els}
-  </svg>`;
+  // Re-number
+  agg.forEach((p,i) => p.id = 'P'+String(i+1).padStart(3,'0'));
+  agg.forEach(p => p.area = Math.round(p.W * p.H * p.qty / 1e6 * 100)/100);
+
+  state.parts = agg;
 }
 
-/* ════════════════════════════════════
-   SVG PERSPECTIVE SKETCH
-════════════════════════════════════ */
-function buildPerspective() {
-  const w   = parseFloat(state.width)||300;
-  const h   = parseInt(state.height)||215;
-  const C   = getStyleColors();
-  const hasUpper = h >= 215;
-  const SW=520, SH=310, mX=40, mY=28;
-  const drawW=SW-mX*2;
+/* ═══════════════════════════════════════════════
+   PACK PLATES  (shelf-packing)
+═══════════════════════════════════════════════ */
+function packPlates() {
+  const PW = CONFIG.PLATE_W;
+  const PH = CONFIG.PLATE_H;
+  const K  = CONFIG.KERF;
 
-  // Real-world heights (cm)
-  const lowerH_cm=85, wtH_cm=3, gapH_cm=12;
-  const upperH_cm=hasUpper?h-lowerH_cm-wtH_cm-gapH_cm-8:0;
-
-  // px-per-cm: fit width
-  const sc=drawW/w;
-  const kitW=drawW;
-
-  // y positions (from bottom up)
-  const floorY=SH-mY;
-  const ceilingY=mY+10;
-  const totalPx=floorY-ceilingY;
-  const scH=totalPx/h; // px per cm (height)
-
-  const lowerTop  = floorY - lowerH_cm*scH;
-  const wtTop     = lowerTop - wtH_cm*scH;
-  const upperBot  = wtTop - gapH_cm*scH;
-  const upperTop  = upperBot - upperH_cm*scH;
-
-  const x0=mX;
-  const numDoors = Math.max(1,Math.round(w/60));
-  const dw = kitW/numDoors;
-
-  let els='';
-
-  // Wall background
-  els+=`<rect x="${x0}" y="${ceilingY}" width="${kitW}" height="${floorY-ceilingY}" fill="${C.wall}" rx="0"/>`;
-
-  // Lower cabinets
-  for(let i=0;i<numDoors;i++){
-    const dx=x0+i*dw;
-    els+=`<rect x="${dx.toFixed(1)}" y="${lowerTop.toFixed(1)}" width="${dw.toFixed(1)}" height="${(floorY-lowerTop).toFixed(1)}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.2"/>`;
-    els+=`<rect x="${(dx+3).toFixed(1)}" y="${(lowerTop+6).toFixed(1)}" width="${(dw-6).toFixed(1)}" height="${(floorY-lowerTop-10).toFixed(1)}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".7" rx="2" opacity=".6"/>`;
-    // Handle
-    if(state.options.has('grepen')){
-      const hy=lowerTop+(floorY-lowerTop)*0.5;
-      els+=`<line x1="${(dx+dw*.3).toFixed(1)}" y1="${hy.toFixed(1)}" x2="${(dx+dw*.7).toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#B0A898" stroke-width="2.5" stroke-linecap="round"/>`;
+  // Expand parts by qty, sort by area desc
+  let rects = [];
+  state.parts.forEach(p => {
+    for (let q=0;q<p.qty;q++) {
+      rects.push({w:p.W+K, h:p.H+K, label:p.desc, partId:p.id, W:p.W, H:p.H});
     }
+  });
+  rects.sort((a,b)=>(b.w*b.h)-(a.w*a.h));
+
+  const plates = [];
+
+  function newPlate() {
+    plates.push({placements:[], curX:0, curY:0, shelfH:0, usedArea:0});
   }
+  newPlate();
 
-  // Worktop
-  els+=`<rect x="${x0}" y="${wtTop.toFixed(1)}" width="${kitW}" height="${((lowerTop-wtTop)+3).toFixed(1)}" fill="${C.wt}"/>`;
-
-  // Overhang shadow
-  els+=`<rect x="${x0}" y="${lowerTop.toFixed(1)}" width="${kitW}" height="3" fill="rgba(0,0,0,.1)"/>`;
-
-  // Upper cabinets
-  if(hasUpper && upperH_cm>15){
-    for(let i=0;i<numDoors;i++){
-      const dx=x0+i*dw;
-      els+=`<rect x="${dx.toFixed(1)}" y="${upperTop.toFixed(1)}" width="${dw.toFixed(1)}" height="${(upperBot-upperTop).toFixed(1)}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.2" opacity=".92"/>`;
-      els+=`<rect x="${(dx+3).toFixed(1)}" y="${(upperTop+5).toFixed(1)}" width="${(dw-6).toFixed(1)}" height="${(upperBot-upperTop-9).toFixed(1)}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".7" rx="2" opacity=".5"/>`;
-      if(state.options.has('grepen')){
-        const hy=upperTop+(upperBot-upperTop)*0.72;
-        els+=`<line x1="${(dx+dw*.3).toFixed(1)}" y1="${hy.toFixed(1)}" x2="${(dx+dw*.7).toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#B0A898" stroke-width="2" stroke-linecap="round"/>`;
+  rects.forEach(r => {
+    let placed = false;
+    for (let pi=0; pi<plates.length && !placed; pi++) {
+      const pl = plates[pi];
+      if (r.w > PW) return; // too wide – skip (edge case)
+      // try current shelf
+      if (pl.curX + r.w <= PW) {
+        if (pl.curY + r.h <= PH) {
+          pl.placements.push({x:pl.curX, y:pl.curY, w:r.w, h:r.h, label:r.label, W:r.W, H:r.H});
+          pl.usedArea += r.W * r.H;
+          pl.shelfH = Math.max(pl.shelfH, r.h);
+          pl.curX += r.w;
+          placed = true;
+        }
+      } else {
+        // new shelf
+        const newY = pl.curY + pl.shelfH;
+        if (newY + r.h <= PH) {
+          pl.curY   = newY;
+          pl.curX   = r.w;
+          pl.shelfH = r.h;
+          pl.placements.push({x:0, y:newY, w:r.w, h:r.h, label:r.label, W:r.W, H:r.H});
+          pl.usedArea += r.W * r.H;
+          placed = true;
+        }
       }
     }
-  }
+    if (!placed) {
+      newPlate();
+      const pl = plates[plates.length-1];
+      pl.placements.push({x:0, y:0, w:r.w, h:r.h, label:r.label, W:r.W, H:r.H});
+      pl.usedArea += r.W * r.H;
+      pl.curX   = r.w;
+      pl.shelfH = r.h;
+    }
+  });
 
-  // Inductie kookplaat on worktop
-  if(state.appliances.has('inductie')){
-    const iw=Math.min(px2(75),kitW*.32), ih=Math.min(px2(45),iw*.6);
-    const ix=x0+kitW*.5-iw/2, iy=wtTop-ih-.5;
-    els+=`<rect x="${ix.toFixed(1)}" y="${iy.toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" fill="#111" rx="2"/>`;
-    [[.22,.3],[.78,.3],[.22,.72],[.78,.72]].forEach(([rx,ry])=>{
-      const r=Math.max(3,iw*.1);
-      els+=`<circle cx="${(ix+iw*rx).toFixed(1)}" cy="${(iy+ih*ry).toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#444" stroke-width="1.3"/>`;
+  // Compute utilisation
+  const plateTotalArea = PW * PH;
+  plates.forEach(pl => {
+    pl.util = Math.round(pl.usedArea / plateTotalArea * 1000) / 10;
+  });
+
+  state.plates = plates;
+}
+
+/* ═══════════════════════════════════════════════
+   EDGE BANDING
+═══════════════════════════════════════════════ */
+function calcEdgeBanding() {
+  const rows = state.parts.map(p => {
+    const perim = 2 * (p.W + p.H);          // mm per part
+    const totalMM = perim * p.qty;
+    const totalM  = Math.round(totalMM / 1000 * 10) / 10;
+    return {...p, perim, totalM};
+  });
+  state.edgeBanding = rows;
+}
+
+/* ═══════════════════════════════════════════════
+   CNC TIME
+═══════════════════════════════════════════════ */
+function calcCNCTime() {
+  const plates      = state.plates.length;
+  const totalParts  = state.parts.reduce((s,p)=>s+p.qty,0);
+  const totalM      = state.edgeBanding.reduce((s,r)=>s+r.totalM,0);
+  const doorCabs    = state.cabinets.length;
+  const shelves     = state.parts.filter(p=>p.desc==='Tussenbord'||p.desc==='Middentablaar').reduce((s,p)=>s+p.qty,0);
+
+  // Cut length (sum of all perimeters on plates, mm → m)
+  const cutLengthMM = state.parts.reduce((s,p)=>s+(2*(p.W+p.H))*p.qty,0);
+
+  const setup    = plates * CONFIG.CNC_SETUP;
+  const cutting  = cutLengthMM / 1000 / CONFIG.CNC_FEED * 60;
+  const repos    = totalParts * 2 * CONFIG.CNC_REPOS;
+  const drilling = (8*doorCabs + 4*shelves) * CONFIG.CNC_DRILL;
+  const edgeband = totalM * CONFIG.CNC_EDGEBAND;
+  const assembly = totalParts * CONFIG.CNC_ASSEMBLY;
+
+  state.cncTime = {
+    setup:    Math.round(setup*10)/10,
+    cutting:  Math.round(cutting*10)/10,
+    repos:    Math.round(repos*10)/10,
+    drilling: Math.round(drilling*10)/10,
+    edgeband: Math.round(edgeband*10)/10,
+    assembly: Math.round(assembly*10)/10
+  };
+}
+
+/* ═══════════════════════════════════════════════
+   XILOG GENERATION
+═══════════════════════════════════════════════ */
+function generateXilog() {
+  const uniqueParts = state.parts;
+  const date = new Date().toISOString().slice(0,10);
+  let lines = [];
+
+  lines.push(`; KeukenLab Xilog Plus Export`);
+  lines.push(`; Gegenereerd: ${date}`);
+  lines.push(`; Keuken: ${state.width}×${state.depth}×${state.height} cm – ${STYLES.find(s=>s.id===state.style)?.name}`);
+  lines.push(``);
+  lines.push(`[PROGRAM]`);
+  lines.push(`NAME = KEUKEN_${date.replace(/-/g,'')}`);
+  lines.push(`VERSION = 1.0`);
+  lines.push(`MACHINE = CNC_BIESSE`);
+  lines.push(``);
+  lines.push(`[SETTINGS]`);
+  lines.push(`MATERIAL = MDF_18MM`);
+  lines.push(`THICKNESS = ${CONFIG.PLATE_THICKNESS}`);
+  lines.push(`KERF = ${CONFIG.KERF}`);
+  lines.push(`FEED_RATE = ${CONFIG.CNC_FEED}000`);
+  lines.push(`SPINDLE_SPEED = 18000`);
+  lines.push(``);
+
+  uniqueParts.forEach((p, i) => {
+    const isTall = state.cabinets.some(c=>c.type==='Tall');
+    const isDoor = p.desc.includes('Zijwand') || p.desc.includes('Bodem') || p.desc.includes('Blad');
+    lines.push(`[PART_${String(i+1).padStart(3,'0')}]`);
+    lines.push(`ID = ${p.id}`);
+    lines.push(`DESCRIPTION = ${p.desc}`);
+    lines.push(`QUANTITY = ${p.qty}`);
+    lines.push(`WIDTH = ${p.W}`);
+    lines.push(`HEIGHT = ${p.H}`);
+    lines.push(`THICKNESS = ${CONFIG.PLATE_THICKNESS}`);
+
+    if (isDoor) {
+      lines.push(``);
+      lines.push(`[DRILL]`);
+      lines.push(`PART_REF = ${p.id}`);
+      lines.push(`HOLES = 8`);
+      lines.push(`DIAMETER = 35`);
+      lines.push(`DEPTH = 13`);
+      lines.push(`SPACING = 32`);
+    }
+    lines.push(``);
+    lines.push(`[EDGEBAND]`);
+    lines.push(`PART_REF = ${p.id}`);
+    lines.push(`EDGE_FRONT = YES`);
+    lines.push(`EDGE_BACK = YES`);
+    lines.push(`EDGE_LEFT = YES`);
+    lines.push(`EDGE_RIGHT = YES`);
+    lines.push(`TAPE_THICKNESS = 0.5`);
+    lines.push(``);
+  });
+
+  lines.push(`[SAW]`);
+  lines.push(`PLATE_COUNT = ${state.plates.length}`);
+  lines.push(`PLATE_W = ${CONFIG.PLATE_W}`);
+  lines.push(`PLATE_H = ${CONFIG.PLATE_H}`);
+  lines.push(`OPTIMISED = YES`);
+
+  state.xilogCode = lines.join('\n');
+}
+
+/* ═══════════════════════════════════════════════
+   PRICING
+═══════════════════════════════════════════════ */
+function calcPrice() {
+  const styleData = STYLES.find(s=>s.id===state.style)||STYLES[0];
+  const base = (state.width/100) * styleData.price;
+  const layoutSurch = LAYOUTS.find(l=>l.id===state.layout)?.surcharge||0;
+
+  let optTotal = 0;
+  state.options.forEach(id=>{
+    const o=OPTIONS.find(x=>x.id===id);
+    if(o) optTotal+=o.price;
+  });
+  let applTotal = 0;
+  state.appliances.forEach(id=>{
+    const a=APPLIANCES.find(x=>x.id===id);
+    if(a) applTotal+=a.price;
+  });
+
+  const subtotal = base + layoutSurch + optTotal + applTotal;
+  const vat = Math.round(subtotal * 0.21);
+  const total = subtotal + vat;
+
+  const platesCost = state.plates.length * CONFIG.PLATE_PRICE;
+  const totalM = state.edgeBanding.reduce((s,r)=>s+r.totalM,0);
+  const rolls  = Math.ceil(totalM / CONFIG.EDGEBAND_ROLL_M);
+  const ebCost = rolls * CONFIG.EDGEBAND_ROLL_PRICE;
+
+  return {base, layoutSurch, optTotal, applTotal, subtotal, vat, total, platesCost, ebCost, totalM, rolls};
+}
+
+/* ═══════════════════════════════════════════════
+   FLOOR PLAN SVG
+═══════════════════════════════════════════════ */
+function drawFloorPlan() {
+  const svg = document.getElementById('fpSvg');
+  const VW = 600, VH = 320;
+  const PAD = 50;
+  const W = state.width * 10;  // mm
+  const D = state.depth  * 10;
+
+  // Scale to fit
+  const availW = VW - PAD*2;
+  const availH = VH - PAD*2;
+  const scale  = Math.min(availW / Math.max(W,1), availH / Math.max(D+200,1));
+  const sw = W * scale;
+  const sd = D * scale;
+  const ox = (VW - sw) / 2;
+  const oy = PAD + 20;
+
+  let html = '';
+
+  // Wall line
+  html += `<rect x="${ox}" y="${oy}" width="${sw}" height="${sd}" fill="#F0E8D8" stroke="#8B7355" stroke-width="2.5" rx="2"/>`;
+
+  // Cabinet blocks (simplified by dividing width)
+  const cabCount = state.cabinets.length;
+  if (cabCount > 0) {
+    const cw = sw / cabCount;
+    state.cabinets.forEach((cab,i) => {
+      const cx = ox + i*cw;
+      const cht = (cab.H > CONFIG.BASE_CABINET_H ? sd*0.9 : sd*0.75);
+      html += `<rect x="${cx+1}" y="${oy+1}" width="${cw-2}" height="${cht-2}" fill="${cab.type==='Tall'?'#DEB887':'#E8DCC8'}" stroke="#A0856A" stroke-width="1.2" rx="2"/>`;
+      if (cw > 30) {
+        html += `<text x="${cx+cw/2}" y="${oy+cht/2+4}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="8" fill="#4A3520">${cab.type[0]}</text>`;
+      }
     });
   }
 
-  // Afzuigkap
-  if(state.appliances.has('afzuigkap')){
-    const hw=Math.min(px2(80),kitW*.28);
-    const hx=x0+kitW*.5-hw/2;
-    const hy=hasUpper&&upperH_cm>15?upperTop-16:wtTop-Math.min(80,lowerTop-ceilingY)*.5;
-    els+=`<polygon points="${hx},${(hy+16).toFixed(1)} ${(hx+hw)},${(hy+16).toFixed(1)} ${(hx+hw*.78)},${hy.toFixed(1)} ${(hx+hw*.22)},${hy.toFixed(1)}" fill="#888" stroke="#666" stroke-width="1"/>`;
-    els+=`<rect x="${(hx+hw*.08).toFixed(1)}" y="${(hy+16).toFixed(1)}" width="${(hw*.84).toFixed(1)}" height="4" fill="#999"/>`;
+  // Appliance blocks
+  const applColors = {inductie:'#FF7043',vaatwasser:'#42A5F5',koelkast:'#26C6DA',oven:'#AB47BC',stoomoven:'#EC407A',afzuigkap:'#78909C'};
+  let appX = ox;
+  state.appliances.forEach(aId => {
+    const a = APPLIANCES.find(x=>x.id===aId);
+    const col = applColors[aId]||'#999';
+    const bw = Math.min(sw*0.15, 40);
+    html += `<rect x="${appX+2}" y="${oy+sd*0.05}" width="${bw-4}" height="${sd*0.7}" fill="${col}" opacity="0.75" rx="3"/>`;
+    html += `<text x="${appX+bw/2}" y="${oy+sd*0.05+sd*0.35+4}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="7" fill="#fff">${a?.icon||'□'}</text>`;
+    appX += bw;
+  });
+
+  // Dimension lines
+  const dimY = oy + sd + 20;
+  const dimX = ox - 25;
+  // Width arrow
+  html += `<line x1="${ox}" y1="${dimY}" x2="${ox+sw}" y2="${dimY}" stroke="#555" stroke-width="1.2" marker-end="url(#arr)" marker-start="url(#arr)"/>`;
+  html += `<text x="${ox+sw/2}" y="${dimY+14}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="11" fill="#333">${state.width} cm</text>`;
+  // Depth arrow
+  html += `<line x1="${dimX}" y1="${oy}" x2="${dimX}" y2="${oy+sd}" stroke="#555" stroke-width="1.2" marker-end="url(#arr)" marker-start="url(#arr)"/>`;
+  html += `<text x="${dimX-6}" y="${oy+sd/2+4}" text-anchor="end" font-family="DM Sans,sans-serif" font-size="11" fill="#333">${state.depth} cm</text>`;
+
+  // U-vorm second run
+  if (state.layout === 'u-vorm') {
+    const sw2 = sw * 0.4;
+    // Left wing
+    html += `<rect x="${ox}" y="${oy+sd}" width="${sd}" height="${sw2*0.4}" fill="#E8DCC8" stroke="#A0856A" stroke-width="1.2"/>`;
+    // Right wing
+    html += `<rect x="${ox+sw-sd}" y="${oy+sd}" width="${sd}" height="${sw2*0.4}" fill="#E8DCC8" stroke="#A0856A" stroke-width="1.2"/>`;
+  }
+  if (state.layout === 'hoek') {
+    html += `<rect x="${ox}" y="${oy}" width="${sd}" height="${sw*0.4}" fill="#E8DCC8" stroke="#A0856A" stroke-width="1.2"/>`;
+  }
+  if (state.layout === 'eiland') {
+    const iw = sw*0.7, ix = ox + sw*0.15;
+    html += `<rect x="${ix}" y="${oy+sd+30}" width="${iw}" height="${sd*0.6}" fill="#F0E8D8" stroke="#8B7355" stroke-width="2" stroke-dasharray="4,3" rx="3"/>`;
+    html += `<text x="${ix+iw/2}" y="${oy+sd+30+sd*0.3+4}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#6B5040">EILAND</text>`;
   }
 
-  // LED strip
-  if(state.options.has('led')&&hasUpper&&upperH_cm>15){
-    els+=`<rect x="${x0}" y="${(upperBot+1).toFixed(1)}" width="${kitW}" height="2.5" fill="#FFE97A" opacity=".7" rx="1"/>`;
-    els+=`<rect x="${x0}" y="${(upperBot+3).toFixed(1)}" width="${kitW}" height="${(lowerTop-upperBot-3).toFixed(1)}" fill="rgba(255,235,120,.06)" rx="0"/>`;
+  // Compass / North
+  html += `<text x="${VW-24}" y="${VH-14}" font-family="DM Sans,sans-serif" font-size="10" fill="#999">N↑</text>`;
+
+  // Defs for arrows
+  const defs = `<defs>
+    <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#555"/>
+    </marker>
+  </defs>`;
+
+  svg.innerHTML = defs + html;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER PRODUCTION TAB
+═══════════════════════════════════════════════ */
+function renderCabinets() {
+  const cabs = [...state.cabinets];
+  const col  = state.cabSort.col;
+  const asc  = state.cabSort.asc;
+  cabs.sort((a,b)=>{
+    let av=a[col], bv=b[col];
+    if(typeof av==='string') av=av.toLowerCase(), bv=bv.toLowerCase();
+    return asc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+
+  const thead = `<tr>${['id','type','W','D','H','notes'].map(c=>`<th onclick="sortCab('${c}')">${c.toUpperCase()} <span style="font-size:.6rem">▲▼</span></th>`).join('')}</tr>`;
+  const rows  = cabs.map(c=>`<tr>
+    <td>${c.id}</td>
+    <td><span class="badge-${c.type.toLowerCase()}">${c.type}</span></td>
+    <td>${c.W}</td><td>${c.D}</td><td>${c.H}</td>
+    <td style="color:#999;font-size:.78rem">${c.notes||''}</td>
+  </tr>`).join('');
+
+  document.getElementById('cabTbl').innerHTML = `<table class="dt"><thead>${thead}</thead><tbody>${rows}</tbody></table>
+    <div style="font-size:.78rem;color:#999;margin-top:.4rem">${cabs.length} kasten &bull; totale breedte: ${Math.round(cabs.reduce((s,c)=>s+c.W,0)/10)} cm</div>`;
+}
+
+function sortCab(col) {
+  if(state.cabSort.col===col) state.cabSort.asc=!state.cabSort.asc;
+  else{state.cabSort.col=col;state.cabSort.asc=true;}
+  renderCabinets();
+}
+
+function renderParts() {
+  const parts = [...state.parts];
+  const col   = state.partsSort.col;
+  const asc   = state.partsSort.asc;
+  parts.sort((a,b)=>{
+    let av=a[col], bv=b[col];
+    if(typeof av==='string') av=av.toLowerCase(), bv=bv.toLowerCase();
+    return asc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+
+  const totalQty  = parts.reduce((s,p)=>s+p.qty,0);
+  const totalArea = parts.reduce((s,p)=>s+p.area,0).toFixed(2);
+
+  const thead = `<tr>${['id','desc','qty','W','H','area'].map(c=>`<th onclick="sortParts('${c}')">${c.toUpperCase()} <span style="font-size:.6rem">▲▼</span></th>`).join('')}</tr>`;
+  const rows  = parts.map(p=>`<tr>
+    <td>${p.id}</td>
+    <td>${p.desc}</td>
+    <td>${p.qty}</td>
+    <td>${p.W}</td>
+    <td>${p.H}</td>
+    <td>${p.area} m²</td>
+  </tr>`).join('');
+  const totRow= `<tr class="tr-tot"><td colspan="2">Totaal</td><td>${totalQty}</td><td></td><td></td><td>${totalArea} m²</td></tr>`;
+
+  document.getElementById('partsTbl').innerHTML = `<table class="dt"><thead>${thead}</thead><tbody>${rows}${totRow}</tbody></table>`;
+}
+
+function sortParts(col) {
+  if(state.partsSort.col===col) state.partsSort.asc=!state.partsSort.asc;
+  else{state.partsSort.col=col;state.partsSort.asc=true;}
+  renderParts();
+}
+
+function exportCSV() {
+  const rows = [['PartID','Omschrijving','Qty','B (mm)','H (mm)','Opp (m²)']];
+  state.parts.forEach(p=>rows.push([p.id,p.desc,p.qty,p.W,p.H,p.area]));
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'delenlijst.csv';
+  a.click();
+}
+
+/* ─── 2C: Plate diagrams ─── */
+function renderPlates() {
+  const wrap = document.getElementById('platesWrap');
+  const PW = CONFIG.PLATE_W, PH = CONFIG.PLATE_H;
+  const SVG_W = 260;
+  const SVG_H = Math.round(SVG_W * PH / PW);
+  const sc = SVG_W / PW;
+
+  const COLORS_PLATE = ['#A8D8B9','#A8C4E8','#F0C89A','#D4A8E8','#E8D4A8','#A8E8D8','#E8A8A8','#C8E8A8'];
+
+  let html = `<div style="margin-bottom:.65rem;font-size:.83rem;color:var(--char-lt)">
+    ${state.plates.length} plat${state.plates.length===1?'':'en'} &bull; 
+    Gem. benutting: ${state.plates.length?Math.round(state.plates.reduce((s,p)=>s+p.util,0)/state.plates.length):'0'}% &bull;
+    Materiaalkosten: €${(state.plates.length*CONFIG.PLATE_PRICE).toLocaleString('nl')}
+  </div><div class="plates-row">`;
+
+  state.plates.forEach((pl,pi) => {
+    let svgInner = `<rect width="${SVG_W}" height="${SVG_H}" fill="#FFCCCC" stroke="#C0A0A0" stroke-width="1"/>`;
+
+    // Hatch waste area
+    svgInner += `<defs><pattern id="hatch${pi}" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#E8B0B0" stroke-width="1.5"/>
+    </pattern></defs>`;
+    svgInner += `<rect width="${SVG_W}" height="${SVG_H}" fill="url(#hatch${pi})"/>`;
+
+    const colorMap = {};
+    let colorIdx = 0;
+    pl.placements.forEach(p => {
+      if (!colorMap[p.label]) colorMap[p.label] = COLORS_PLATE[colorIdx++ % COLORS_PLATE.length];
+      const x = p.x*sc, y = p.y*sc, w = p.w*sc, h = p.h*sc;
+      const col = colorMap[p.label];
+      svgInner += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" stroke="#555" stroke-width=".6" rx="1"/>`;
+      if (w > 20 && h > 12) {
+        svgInner += `<text x="${(x+w/2).toFixed(1)}" y="${(y+h/2+3).toFixed(1)}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="${Math.min(7,w*0.18).toFixed(1)}" fill="#2C2825">${p.W}×${p.H}</text>`;
+      }
+    });
+
+    html += `<div class="plate-box">
+      <h5>Plaat ${pi+1}</h5>
+      <svg width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}" xmlns="http://www.w3.org/2000/svg">${svgInner}</svg>
+      <div class="plate-util">Benutting: <b>${pl.util}%</b></div>
+    </div>`;
+  });
+
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+/* ─── 2D: Edge banding table ─── */
+function renderEdge() {
+  const rows = state.edgeBanding;
+  const totalM = rows.reduce((s,r)=>s+r.totalM,0).toFixed(1);
+  const rolls  = Math.ceil(parseFloat(totalM) / CONFIG.EDGEBAND_ROLL_M);
+  const cost   = rolls * CONFIG.EDGEBAND_ROLL_PRICE;
+
+  const thead = `<tr><th>PartID</th><th>Omschrijving</th><th>Qty</th><th>Omtrek/deel (mm)</th><th>Totaal (m)</th></tr>`;
+  const trows = rows.map(r=>`<tr>
+    <td>${r.id}</td><td>${r.desc}</td><td>${r.qty}</td>
+    <td>${r.perim}</td><td>${r.totalM}</td>
+  </tr>`).join('');
+  const tot = `<tr class="tr-tot"><td colspan="4">Totaal</td><td>${totalM} m</td></tr>`;
+
+  document.getElementById('edgeTbl').innerHTML = `
+    <table class="dt"><thead>${thead}</thead><tbody>${trows}${tot}</tbody></table>
+    <div style="font-size:.83rem;color:var(--char-lt);margin-top:.55rem">
+      Rollen nodig: <b>${rolls}</b> × €${CONFIG.EDGEBAND_ROLL_PRICE} = <b>€${cost.toLocaleString('nl')}</b>
+    </div>`;
+
+  const warn = document.getElementById('edgeWarn');
+  warn.classList.toggle('hidden', parseFloat(totalM) <= 500);
+}
+
+/* ─── 2E: CNC time ─── */
+function renderCNC() {
+  const t = state.cncTime;
+  const rows = [
+    ['Setup platen', t.setup, 'min'],
+    ['Zagen/frezen', t.cutting, 'min'],
+    ['Herpositionering', t.repos, 'min'],
+    ['Boren', t.drilling, 'min'],
+    ['Kantenbanden', t.edgeband, 'min'],
+    ['Assemblage', t.assembly, 'min']
+  ];
+  const total = Object.values(t).reduce((s,v)=>s+v,0);
+  const totalH = Math.round(total/60*10)/10;
+  const days1  = Math.ceil(totalH/8);
+  const days2  = Math.ceil(totalH/16);
+
+  const thead = `<tr><th>Bewerking</th><th>Tijd (min)</th><th>Tijd (uur)</th></tr>`;
+  const trows = rows.map(([n,v])=>`<tr><td>${n}</td><td>${v}</td><td>${Math.round(v/60*10)/10}</td></tr>`).join('');
+  const tot   = `<tr class="tr-tot"><td>Totaal</td><td>${Math.round(total)}</td><td>${totalH}</td></tr>`;
+
+  document.getElementById('cncTbl').innerHTML = `<table class="dt"><thead>${thead}</thead><tbody>${trows}${tot}</tbody></table>`;
+
+  // Stacked bar chart
+  const CHART_W = 520, CHART_H = 38;
+  const COLORS_CNC = ['#C4935A','#7A9E7E','#5B8DD9','#D9855B','#9B59B6','#27AE60'];
+  const labels = ['Setup','Zagen','Repos','Boren','Kantenbanden','Assemblage'];
+  const vals   = [t.setup,t.cutting,t.repos,t.drilling,t.edgeband,t.assembly];
+  const chartSvg = document.getElementById('cncChart');
+  chartSvg.setAttribute('viewBox',`0 0 ${CHART_W} ${CHART_H+20}`);
+  let sx = 0, barH = 26, by = 4;
+  let barHtml = '';
+  vals.forEach((v,i)=>{
+    const bw = total>0 ? v/total*CHART_W : 0;
+    barHtml += `<rect x="${sx.toFixed(1)}" y="${by}" width="${bw.toFixed(1)}" height="${barH}" fill="${COLORS_CNC[i]}" rx="0"/>`;
+    if (bw > 24) barHtml += `<text x="${(sx+bw/2).toFixed(1)}" y="${by+barH/2+4}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="#fff">${labels[i]}</text>`;
+    sx += bw;
+  });
+  chartSvg.innerHTML = barHtml;
+
+  document.getElementById('cncSum').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-val">${totalH}</div><div class="stat-lbl">Totaal uren</div></div>
+      <div class="stat-box"><div class="stat-val">${days1}</div><div class="stat-lbl">Dagen (1 machine)</div></div>
+      <div class="stat-box"><div class="stat-val">${days2}</div><div class="stat-lbl">Dagen (2 machines)</div></div>
+    </div>`;
+}
+
+/* ─── 2F: Xilog display ─── */
+function renderXilog() {
+  const code = state.xilogCode;
+  // Syntax highlight
+  const highlighted = code.split('\n').map(line => {
+    if (line.startsWith(';')) return `<span class="xc">${escHtml(line)}</span>`;
+    if (line.startsWith('[') && line.endsWith(']')) return `<span class="xh">${escHtml(line)}</span>`;
+    const eq = line.indexOf('=');
+    if (eq > -1) {
+      const key = escHtml(line.slice(0,eq));
+      const val = escHtml(line.slice(eq));
+      return `<span class="xk">${key}</span>${val}`;
+    }
+    return escHtml(line);
+  }).join('\n');
+  document.getElementById('xilogPre').innerHTML = highlighted;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function dlXilog() {
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(state.xilogCode);
+  a.download = 'keuken_export.xil';
+  a.click();
+}
+
+/* ─── 2G: Material summary ─── */
+function renderMaterial() {
+  const p = calcPrice();
+  const t = state.cncTime;
+  const totalCNC = Object.values(t).reduce((s,v)=>s+v,0);
+  const totalH = Math.round(totalCNC/60*10)/10;
+  const avgUtil = state.plates.length ? Math.round(state.plates.reduce((s,p)=>s+p.util,0)/state.plates.length) : 0;
+
+  const rows = [
+    ['Plaatmateriaal', `${state.plates.length} × €${CONFIG.PLATE_PRICE}`, `€${p.platesCost.toLocaleString('nl')}`],
+    ['Kantenbandrol', `${p.rolls} × €${CONFIG.EDGEBAND_ROLL_PRICE}`, `€${p.ebCost.toLocaleString('nl')}`],
+    ['CNC bewerkingstijd', `${totalH} uur`, ''],
+    ['Totaal materiaal', '', `€${(p.platesCost+p.ebCost).toLocaleString('nl')}`]
+  ];
+  const thead = `<tr><th>Post</th><th>Detail</th><th>Kosten</th></tr>`;
+  const trows = rows.map(([n,d,v],i)=>`<tr${i===rows.length-1?' class="tr-tot"':''}>
+    <td>${n}</td><td style="color:#999">${d}</td><td style="font-weight:${i===rows.length-1?700:400}">${v}</td>
+  </tr>`).join('');
+  document.getElementById('matTbl').innerHTML = `<table class="dt"><thead>${thead}</thead><tbody>${trows}</tbody></table>`;
+
+  document.getElementById('matStats').innerHTML = `
+    <div class="stat-box"><div class="stat-val">${state.plates.length}</div><div class="stat-lbl">Plaatmateriaal</div></div>
+    <div class="stat-box"><div class="stat-val">${p.rolls}</div><div class="stat-lbl">Kantenbandrol</div></div>
+    <div class="stat-box"><div class="stat-val">${avgUtil}%</div><div class="stat-lbl">Gem. plaatvulling</div></div>
+    <div class="stat-box"><div class="stat-val">${totalH}</div><div class="stat-lbl">CNC uren</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   SIDEBAR RENDER
+═══════════════════════════════════════════════ */
+function renderSidebar() {
+  const p = calcPrice();
+  const styleData = STYLES.find(s=>s.id===state.style)||STYLES[0];
+  const layoutData = LAYOUTS.find(l=>l.id===state.layout)||LAYOUTS[0];
+
+  let lines = '';
+  const pl = (label, value, cls='') =>
+    `<div class="pl ${cls}"><span class="pll">${label}</span><span class="plv">${value}</span></div>`;
+
+  // Base price
+  lines += pl('','','sec') + `<div class="pl sec"><span class="pll">Basisprijs</span></div>`;
+  lines += pl(`${state.width}/100 × €${styleData.price}/m`, `€${Math.round(p.base).toLocaleString('nl')}`);
+
+  if (p.layoutSurch > 0) {
+    lines += pl(`${layoutData.name} toeslag`, `€${p.layoutSurch.toLocaleString('nl')}`);
   }
 
-  // Floor line
-  els+=`<line x1="${x0}" y1="${floorY}" x2="${x0+kitW}" y2="${floorY}" stroke="#8B7355" stroke-width="2"/>`;
+  // Options
+  if (state.options.size > 0) {
+    lines += `<div class="pl sec"><span class="pll">Opties</span></div>`;
+    state.options.forEach(id => {
+      const o = OPTIONS.find(x=>x.id===id);
+      if(o) lines += pl(o.name, `€${o.price.toLocaleString('nl')}`);
+    });
+  }
 
-  // Dim label
-  els+=`<text x="${SW/2}" y="${SH-6}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">${w} cm breed · ${h} cm hoog</text>`;
+  // Appliances
+  if (state.appliances.size > 0) {
+    lines += `<div class="pl sec"><span class="pll">Apparatuur</span></div>`;
+    state.appliances.forEach(id => {
+      const a = APPLIANCES.find(x=>x.id===id);
+      if(a) lines += pl(a.name, `€${a.price.toLocaleString('nl')}`);
+    });
+  }
 
-  function px2(cm){return cm*sc;}
+  lines += `<div style="height:.5rem"></div>`;
+  lines += pl('Subtotaal', `€${Math.round(p.subtotal).toLocaleString('nl')}`, 'tot');
+  lines += pl('BTW 21%', `€${p.vat.toLocaleString('nl')}`);
+  lines += `<div class="pl grand"><span class="pll">Totaal incl. BTW</span><span class="plv">€${p.total.toLocaleString('nl')}</span></div>`;
 
-  return `<svg width="${SW}" height="${SH}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${SW}" height="${SH}" fill="#EDE8DC" rx="10"/>
-  <text x="${SW/2}" y="17" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">vooraanzicht — niet op schaal</text>
-  ${els}
-  </svg>`;
+  document.getElementById('sbLines').innerHTML = lines;
+
+  // Meta
+  const totalM = state.edgeBanding.reduce((s,r)=>s+r.totalM,0).toFixed(1);
+  const mr = (l,v) => `<div class="mr"><span class="mrl">${l}</span><span class="mrv">${v}</span></div>`;
+  document.getElementById('sbMeta').innerHTML =
+    mr('Plaatmateriaal', `${state.plates.length} platen`) +
+    mr('Kantenbandrol', `${Math.ceil(parseFloat(totalM)/100)} rollen`) +
+    mr('Leveringstijd', styleData.weeks) +
+    mr('Kleur/afwerking', `${COLORS.find(c=>c.id===state.color)?.name||''} / ${FINISHES.find(f=>f.id===state.finish)?.name||''}`);
 }
 
-/* ════════════════════════════════════
-   RENDER – Step 1
-════════════════════════════════════ */
-function renderStyles(){
-  const el=document.getElementById('style-grid');
-  el.innerHTML=STYLES.map(s=>`
-    <div class="style-card${state.style===s.id?' selected':''}" data-style="${s.id}" role="button" tabindex="0">
-      <div class="style-card-icon">${s.icon}</div>
-      <div class="style-card-name">${s.name}</div>
-      <div class="style-card-desc">${s.desc}</div>
-      <div class="style-card-price">${eur(s.price)} / strekkende meter</div>
-      <div class="check-mark">✓</div>
-    </div>`).join('');
-  el.querySelectorAll('.style-card').forEach(c=>{
-    const pick=()=>{state.style=c.dataset.style;update();};
-    c.addEventListener('click',pick);
-    c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
-  });
+function reqOfferte() {
+  const p = calcPrice();
+  alert(`Offerte aangevraagd!\n\nKeuken: ${state.width}×${state.depth}×${state.height} cm\nStijl: ${STYLES.find(s=>s.id===state.style)?.name}\nTotaal: €${p.total.toLocaleString('nl')}\n\nIn een echte applicatie worden de gegevens hier naar een backend gestuurd.`);
 }
 
-/* ════════════════════════════════════
-   RENDER – Step 2
-════════════════════════════════════ */
-function renderHeights(){
-  const el=document.getElementById('height-group');
-  el.innerHTML=HEIGHTS.map(h=>`<button class="btn-pill${state.height===h?' selected':''}" data-h="${h}">${h} cm</button>`).join('');
-  el.querySelectorAll('.btn-pill').forEach(b=>b.addEventListener('click',()=>{state.height=parseInt(b.dataset.h);update();}));
-}
-function renderSetup(){
-  const el=document.getElementById('setup-grid');
-  el.innerHTML=SETUPS.map(s=>`
-    <button class="setup-card${state.setup===s.id?' selected':''}" data-setup="${s.id}">
-      <span class="setup-name">${s.name}</span>
-      <span class="setup-desc">${s.desc}</span>
-      ${s.surcharge?`<span class="setup-extra">+ ${eur(s.surcharge)}</span>`:''}
-    </button>`).join('');
-  el.querySelectorAll('.setup-card').forEach(b=>b.addEventListener('click',()=>{
-    state.setup=b.dataset.setup;
-    if(!isCorner()&&state.options.has('carrousel')) state.options.delete('carrousel');
-    update();
-  }));
-}
+/* ═══════════════════════════════════════════════
+   MAIN RECALCULATE
+═══════════════════════════════════════════════ */
+function recalculate() {
+  // Read inputs
+  state.width  = Math.max(150, Math.min(600, parseInt(document.getElementById('inpW').value)||300));
+  state.depth  = Math.max(50,  Math.min(90,  parseInt(document.getElementById('inpD').value)||60));
+  state.height = parseInt(document.getElementById('inpH').value)||215;
+  state.wishes = document.getElementById('wishesTA').value;
 
-/* ════════════════════════════════════
-   RENDER – Step 3
-════════════════════════════════════ */
-function renderOptions(){
-  const el=document.getElementById('options-list');
-  el.innerHTML=OPTIONS.map(opt=>{
-    const hidden=opt.cornerOnly&&!isCorner();
-    const reason=disabledOptReason(opt);
-    const sel=state.options.has(opt.id);
-    const rec=state.style&&opt.recommended.includes(state.style);
-    const styleName=state.style?STYLES.find(s=>s.id===state.style)?.name:'';
-    let cls='toggle-item';
-    if(hidden)cls+=' is-hidden'; if(reason)cls+=' is-disabled'; if(sel)cls+=' is-selected';
-    return `<div class="${cls}" data-opt="${opt.id}" role="checkbox" aria-checked="${sel}" tabindex="${reason?-1:0}" ${reason?`title="${reason}"`:''}">
-      <div class="sw"></div>
-      <div class="toggle-content">
-        <div class="toggle-name">${opt.name}${rec?`<span class="badge badge-rec">Aanbevolen voor ${styleName}</span>`:''}</div>
-        <div class="toggle-desc">${opt.desc}</div>
-        ${reason?`<div class="toggle-reason">${reason}</div>`:''}
-      </div>
-      <div class="toggle-price">${eur(opt.price)}</div>
-    </div>`;
-  }).join('');
-  el.querySelectorAll('.toggle-item:not(.is-disabled):not(.is-hidden)').forEach(el2=>{
-    const t=()=>{const id=el2.dataset.opt;state.options.has(id)?state.options.delete(id):state.options.add(id);update();};
-    el2.addEventListener('click',t);
-    el2.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});
-  });
+  document.getElementById('charCt').textContent = state.wishes.length;
+
+  // Width warning
+  document.getElementById('warnWidth').classList.toggle('hidden', state.width <= 450);
+
+  // Derive production data
+  deriveCabinets();
+  deriveParts();
+  packPlates();
+  calcEdgeBanding();
+  calcCNCTime();
+  generateXilog();
+
+  // Render
+  drawFloorPlan();
+  renderSidebar();
+  renderCabinets();
+  renderParts();
+  renderPlates();
+  renderEdge();
+  renderCNC();
+  renderXilog();
+  renderMaterial();
 }
 
-/* ════════════════════════════════════
-   RENDER – Step 4
-════════════════════════════════════ */
-function renderAppliances(){
-  const el=document.getElementById('appliances-list');
-  el.innerHTML=APPLIANCES.map(app=>{
-    const reason=disabledAppReason(app), sel=state.appliances.has(app.id);
-    let cls='toggle-item'; if(reason)cls+=' is-disabled'; if(sel)cls+=' is-selected';
-    return `<div class="${cls}" data-app="${app.id}" role="checkbox" aria-checked="${sel}" tabindex="${reason?-1:0}" ${reason?`title="${reason}"`:''}">
-      <div class="sw"></div>
-      <div class="toggle-content">
-        <div class="toggle-name">${app.name}</div>
-        <div class="toggle-desc">${app.desc}</div>
-        ${reason?`<div class="toggle-reason">${reason}</div>`:''}
-      </div>
-      <div class="toggle-price">${eur(app.price)}</div>
-    </div>`;
-  }).join('');
-  el.querySelectorAll('.toggle-item:not(.is-disabled)').forEach(el2=>{
-    const t=()=>{const id=el2.dataset.app;state.appliances.has(id)?state.appliances.delete(id):state.appliances.add(id);update();};
-    el2.addEventListener('click',t);
-    el2.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});
-  });
-}
+/* ═══════════════════════════════════════════════
+   AI VISUALIZATION
+═══════════════════════════════════════════════ */
+async function runAIViz() {
+  const btn = document.getElementById('aiBtn');
+  const res = document.getElementById('aiResult');
+  const apiKey = document.getElementById('apiKey').value.trim();
 
-/* ════════════════════════════════════
-   RENDER – Step 5
-════════════════════════════════════ */
-function renderStep5(){
-  const cg=document.getElementById('color-grid');
-  cg.innerHTML=COLORS.map(c=>`
-    <div class="color-swatch${state.color===c.id?' selected':''}" data-color="${c.id}">
-      <div class="color-dot" style="background:${c.hex};${c.dark?'border-color:#fff2':''}"></div>
-      <span>${c.name}</span>
-    </div>`).join('');
-  cg.querySelectorAll('.color-swatch').forEach(sw=>{
-    sw.addEventListener('click',()=>{state.color=state.color===sw.dataset.color?null:sw.dataset.color;update();});
-  });
+  if (!apiKey) {
+    alert('Voer een Anthropic API-sleutel in bovenaan de pagina.');
+    return;
+  }
 
-  const fr=document.getElementById('finish-row');
-  fr.innerHTML=FINISHES.map(f=>`
-    <button class="finish-btn${state.finish===f.id?' selected':''}" data-finish="${f.id}">
-      <span class="finish-btn-name">${f.name}</span>
-      <span class="finish-btn-desc">${f.desc}</span>
-    </button>`).join('');
-  fr.querySelectorAll('.finish-btn').forEach(b=>{
-    b.addEventListener('click',()=>{state.finish=state.finish===b.dataset.finish?null:b.dataset.finish;update();});
-  });
-}
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Genereren...';
+  res.classList.remove('show');
 
-/* ════════════════════════════════════
-   RENDER – Field messages
-════════════════════════════════════ */
-function renderFieldMsgs(){
-  const wMsg=document.getElementById('msg-width'), wInp=document.getElementById('inp-width'), ws=widthStatus();
-  wInp.classList.remove('has-error'); wMsg.className='field-msg'; wMsg.textContent='';
-  if(ws==='low'){wInp.classList.add('has-error');wMsg.classList.add('err');wMsg.textContent='Minimum breedte is 150 cm.';}
-  else if(ws==='high'){wInp.classList.add('has-error');wMsg.classList.add('err');wMsg.textContent='Maximum breedte is 600 cm.';}
-  else if(ws==='ok'&&parseFloat(state.width)>450){wMsg.classList.add('warn');wMsg.textContent='Tip: overweeg een U-vorm of Eiland opstelling voor deze breedte.';}
+  const styleData  = STYLES.find(s=>s.id===state.style)||STYLES[0];
+  const layoutData = LAYOUTS.find(l=>l.id===state.layout)||LAYOUTS[0];
+  const colorData  = COLORS.find(c=>c.id===state.color)||COLORS[0];
+  const finishData = FINISHES.find(f=>f.id===state.finish)||FINISHES[0];
+  const selectedOpts = OPTIONS.filter(o=>state.options.has(o.id)).map(o=>o.name);
+  const selectedAppl = APPLIANCES.filter(a=>state.appliances.has(a.id)).map(a=>a.name);
 
-  const dMsg=document.getElementById('msg-depth'), dInp=document.getElementById('inp-depth'), dv=parseFloat(state.depth);
-  dInp.classList.remove('has-error'); dMsg.className='field-msg'; dMsg.textContent='';
-  if(state.depth&&(dv<50||dv>90)){dInp.classList.add('has-error');dMsg.classList.add('err');dMsg.textContent=dv<50?'Minimum diepte is 50 cm.':'Maximum diepte is 90 cm.';}
-}
+  const prompt = `Je bent een interieurontwerper gespecialiseerd in keukens. Genereer een gedetailleerde ontwerp­beschrijving voor de volgende keuken­configuratie:
 
-/* ════════════════════════════════════
-   RENDER – Sidebar
-════════════════════════════════════ */
-function renderSidebar(){
-  const body=document.getElementById('sidebar-body');
-  const {base,setupExtra,optTotal,appTotal,sub,vat,total}=calculate();
-  const style=getStyle(), setup=getSetup(), dv=getDelivery(), ready=state.style&&dimsOk();
+Stijl: ${styleData.name}
+Afmetingen: ${state.width} × ${state.depth} × ${state.height} cm
+Indeling: ${layoutData.name}
+Kleur: ${colorData.name}
+Afwerking: ${finishData.name}
+Opties: ${selectedOpts.join(', ') || 'Geen'}
+Apparatuur: ${selectedAppl.join(', ') || 'Geen'}
+Bijzondere wensen: ${state.wishes || 'Geen'}
 
-  const optRows=[...state.options].map(id=>{const o=OPTIONS.find(x=>x.id===id);return o?`<div class="q-row"><span class="q-name">${o.name}</span><span class="q-val">${eur(o.price)}</span></div>`:''}).join('');
-  const appRows=[...state.appliances].map(id=>{const a=APPLIANCES.find(x=>x.id===id);return a?`<div class="q-row"><span class="q-name">${a.name}</span><span class="q-val">${eur(a.price)}</span></div>`:''}).join('');
-  const missing=[];
-  if(!state.style) missing.push('keukenstijl');
-  if(!dimsOk()) missing.push('geldige breedte');
-
-  body.innerHTML=`
-    ${style?`<div class="q-section">
-      <div class="q-label">Basisprijs</div>
-      <div class="q-row"><span class="q-name">${style.name} (${eur(style.price)}/m)</span><span class="q-val">${dimsOk()?eur(base):'–'}</span></div>
-      ${setup&&setup.surcharge?`<div class="q-row"><span class="q-name">Opstelling ${setup.name}</span><span class="q-val">+ ${eur(setupExtra)}</span></div>`:''}
-    </div>`:'<p class="empty-hint">Kies een stijl om te beginnen…</p>'}
-    ${state.options.size?`<div class="q-section"><div class="q-label">Opties &amp; materialen</div>${optRows}</div>`:''}
-    ${state.appliances.size?`<div class="q-section"><div class="q-label">Inbouwapparatuur</div>${appRows}</div>`:''}
-    ${style?`<div class="q-divider"></div>
-    <div class="q-total-row muted"><span>Subtotaal excl. BTW</span><span>${eur(sub)}</span></div>
-    <div class="q-total-row muted"><span>BTW (21%)</span><span>${eur(vat)}</span></div>
-    <div class="q-total-row big"><span>Totaal incl. BTW</span><span>${eur(total)}</span></div>
-    <div class="q-divider"></div>`:'<div class="q-divider"></div>'}
-    ${dv?`<div class="delivery-tag"><span>&#128667;</span><span>Levertijd: <strong>${dv}</strong></span></div>`:''}
-    ${missing.length?`<div class="warn-box show">Vul nog in: <strong>${missing.join(' en ')}</strong>.</div>`:''}
-    <button class="btn-cta" id="btn-quote" ${ready?'':'disabled'}>Offerte aanvragen</button>`;
-
-  document.getElementById('btn-quote')?.addEventListener('click',()=>{
-    alert('Bedankt! In een echte implementatie wordt hier het offerteformulier geopend.');
-  });
-}
-
-/* ════════════════════════════════════
-   RENDER – Generate button
-════════════════════════════════════ */
-function renderGenerateBtn(){
-  const ok=state.style&&dimsOk();
-  document.getElementById('btn-svg').disabled=!ok;
-  document.getElementById('btn-generate').disabled=!ok;
-}
-
-/* ════════════════════════════════════
-   CLAUDE API
-════════════════════════════════════ */
-async function generateDesign(){
-  if(!state.apiKey){alert('Voer eerst uw Anthropic API-sleutel in de balk bovenaan de pagina in.');return;}
-  if(!state.style||!dimsOk()){alert('Vul minimaal een stijl en geldige breedte in.');return;}
-
-  const style=getStyle(), setup=getSetup();
-  const selOpts=[...state.options].map(id=>OPTIONS.find(o=>o.id===id)?.name).filter(Boolean);
-  const selApps=[...state.appliances].map(id=>APPLIANCES.find(a=>a.id===id)?.name).filter(Boolean);
-  const colorObj=COLORS.find(c=>c.id===state.color);
-  const finishObj=FINISHES.find(f=>f.id===state.finish);
-  const worktop=selOpts.find(n=>n?.includes('werkblad'))||'standaard laminaat';
-
-  const prompt=`You are an expert kitchen designer. Generate a vivid, detailed description of a kitchen visualization.
-
-Kitchen specifications:
-- Style: ${style.name}
-- Width: ${state.width}cm, Depth: ${state.depth}cm, Height: ${state.height}cm
-- Layout: ${setup.name}
-- Worktop: ${worktop}
-- Door finish: ${finishObj?.name||'Mat'}
-- Color palette: ${colorObj?.name||'Wit'}
-- Appliances: ${selApps.join(', ')||'none'}
-- Special wishes: ${state.wishes||'none'}
-
-Return ONLY a valid JSON object (no markdown, no explanation) with exactly these fields:
+Reageer UITSLUITEND met geldige JSON in dit formaat (geen extra tekst):
 {
-  "imagePrompt": "A photorealistic interior render of a ${style.name.toLowerCase()} kitchen, [color], [worktop], [layout], natural light, professional photography, 8k resolution — write an 80-word image generation prompt",
-  "designTitle": "Short poetic Dutch name for this kitchen (max 5 words)",
-  "designDescription": "Two sentences describing this design to the Dutch client",
-  "highlights": ["3 to 5 short Dutch bullet points about key design choices"],
-  "styleAdvice": "One sentence of professional Dutch styling advice"
+  "title": "Korte pakkende titel (max 8 woorden)",
+  "description": "Sfeervolle beschrijving van het ontwerp (2-3 zinnen)",
+  "highlights": ["Kenmerk 1", "Kenmerk 2", "Kenmerk 3", "Kenmerk 4"],
+  "advice": "Praktisch interieuradvies voor dit ontwerp (1-2 zinnen)",
+  "imagePrompt": "Gedetailleerde Engelse prompt voor een AI beeldgenerator (max 50 woorden)"
 }`;
 
-  showLoading();
-  hideError();
-  hideResults();
-
-  const body=JSON.stringify({
-    model:'claude-3-haiku-20240307',
-    max_tokens:1024,
-    messages:[{role:'user',content:prompt}],
-  });
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':state.apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true',
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
-      body,
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 1024,
+        messages: [{role:'user', content: prompt}]
+      })
     });
-    if(!res.ok){
-      let errMsg=`HTTP ${res.status}`;
-      try{const e=await res.json();errMsg=e.error?.message||errMsg;}catch(_){}
-      hideLoading();
-      // Show full raw key prefix to help debug wrong-key issues
-      const keyPreview=state.apiKey.length>12?state.apiKey.slice(0,12)+'…':'(leeg)';
-      showError(`API fout (${res.status}): ${errMsg}<br><small>Sleutel begint met: <code>${keyPreview}</code></small>`);
-      return;
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({error:{message:'Onbekende fout'}}));
+      throw new Error(err.error?.message || `HTTP ${resp.status}`);
     }
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'';
-    const m=text.match(/\{[\s\S]*\}/);
-    if(!m){hideLoading();showError('Claude stuurde geen JSON terug. Probeer opnieuw.');return;}
-    let design;
-    try{design=JSON.parse(m[0]);}
-    catch(pe){hideLoading();showError('JSON parsing mislukt: '+pe.message);return;}
-    hideLoading();
-    renderVisualization(design);
-  }catch(err){
-    hideLoading();
-    showError(`Fout: ${err.message}`);
+
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+
+    // Extract JSON
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Geen geldige JSON in antwoord');
+    const design = JSON.parse(jsonMatch[0]);
+
+    res.innerHTML = `
+      <h3>${escHtml(design.title||'Ontwerp')}</h3>
+      <div class="ai-desc">${escHtml(design.description||'')}</div>
+      <div class="ai-hl-label">Kenmerken</div>
+      <ul class="ai-hl">${(design.highlights||[]).map(h=>`<li>${escHtml(h)}</li>`).join('')}</ul>
+      <div class="ai-advice"><strong style="color:var(--oak-lt);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.25rem">Advies</strong>${escHtml(design.advice||'')}</div>
+      ${design.imagePrompt?`<div style="margin-top:.75rem;padding:.6rem .8rem;background:rgba(255,255,255,.06);border-radius:6px;font-size:.75rem;color:#6B7280"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:#555;margin-bottom:.25rem">Image prompt</div>${escHtml(design.imagePrompt)}</div>`:''}`;
+    res.classList.add('show');
+  } catch(e) {
+    res.innerHTML = `<div style="color:#FC8181;font-size:.85rem">Fout: ${escHtml(e.message)}</div>`;
+    res.classList.add('show');
   }
+
+  btn.disabled = false;
+  btn.innerHTML = '&#10024; Genereer AI visualisatie';
 }
 
-function showLoading(){document.getElementById('viz-loading').classList.add('show');}
-function hideLoading(){document.getElementById('viz-loading').classList.remove('show');}
-function showError(msg){const e=document.getElementById('viz-error');e.classList.add('show');e.innerHTML=`<strong>Fout bij genereren:</strong> ${msg}<br><small>Controleer uw API-sleutel en probeer opnieuw.</small>`;}
-function hideError(){document.getElementById('viz-error').classList.remove('show');}
-function hideResults(){document.getElementById('viz-grid').style.display='none';document.getElementById('design-card').style.display='none';}
+/* ═══════════════════════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════════════════════ */
+document.getElementById('inpW').addEventListener('input', recalculate);
+document.getElementById('inpD').addEventListener('input', recalculate);
+document.getElementById('inpH').addEventListener('change', recalculate);
+document.getElementById('wishesTA').addEventListener('input', recalculate);
 
-function renderVisualization(design){
-  // SVGs
-  document.getElementById('floorplan-wrap').innerHTML=buildFloorPlan();
-  document.getElementById('perspective-wrap').innerHTML=buildPerspective();
-  document.getElementById('viz-grid').style.display='grid';
-
-  // Design card
-  document.getElementById('dc-title').textContent=design.designTitle||'Uw keukenontwerp';
-  document.getElementById('dc-desc').textContent=design.designDescription||'';
-  const hl=document.getElementById('dc-highlights');
-  hl.innerHTML=(design.highlights||[]).map(h=>`<li>${h}</li>`).join('');
-  document.getElementById('dc-advice').textContent=design.styleAdvice||'';
-  const pt=document.getElementById('dc-prompt');
-  pt.value=design.imagePrompt||'';
-  document.getElementById('design-card').style.display='block';
-
-  // Scroll to viz
-  document.getElementById('viz-section').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-/* ════════════════════════════════════
-   MASTER UPDATE
-════════════════════════════════════ */
-function update(){
-  renderStyles();
-  renderHeights();
-  renderSetup();
-  renderOptions();
-  renderAppliances();
-  renderStep5();
-  renderFieldMsgs();
-  renderSidebar();
-  renderGenerateBtn();
-}
-
-/* ════════════════════════════════════
-   EVENT BINDINGS
-════════════════════════════════════ */
-document.getElementById('api-key-inp').addEventListener('input',e=>{state.apiKey=e.target.value.trim();});
-document.getElementById('inp-width').addEventListener('input',e=>{state.width=e.target.value;update();});
-document.getElementById('inp-depth').addEventListener('input',e=>{state.depth=e.target.value;update();});
-document.getElementById('inp-wishes').addEventListener('input',e=>{
-  state.wishes=e.target.value;
-  document.getElementById('char-count').textContent=e.target.value.length;
-});
-document.getElementById('btn-svg').addEventListener('click',()=>{
-  hideError();
-  document.getElementById('floorplan-wrap').innerHTML=buildFloorPlan();
-  document.getElementById('perspective-wrap').innerHTML=buildPerspective();
-  document.getElementById('viz-grid').style.display='grid';
-  document.getElementById('viz-section').scrollIntoView({behavior:'smooth',block:'start'});
-});
-document.getElementById('btn-generate').addEventListener('click',generateDesign);
-document.getElementById('btn-copy-prompt').addEventListener('click',()=>{
-  const ta=document.getElementById('dc-prompt');
-  ta.select();
-  navigator.clipboard.writeText(ta.value).then(()=>{
-    const btn=document.getElementById('btn-copy-prompt');
-    btn.textContent='Gekopieerd!';
-    setTimeout(()=>{btn.textContent='Kopieer';},2000);
-  });
-});
-
-/* ════════════════════════════════════
+/* ═══════════════════════════════════════════════
    INIT
-════════════════════════════════════ */
-update();
+═══════════════════════════════════════════════ */
+initUI();
+recalculate();
+
 </script>
 </body>
 </html>
