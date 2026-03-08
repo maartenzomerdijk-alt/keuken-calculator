@@ -1714,6 +1714,97 @@ function recalculate() {
 }
 
 /* ═══════════════════════════════════════════════
+   KITCHEN PERSPECTIVE SVG SKETCH
+═══════════════════════════════════════════════ */
+function kitchenVizSVG() {
+  const VW=560, VH=320, ANG=28*Math.PI/180, DPTH=62;
+  const dX=DPTH*Math.cos(ANG), dY=DPTH*Math.sin(ANG);
+  const L=46, R=VW-18, FW=R-L;
+  const FLOOR_Y=VH-28, BASE_H=165, CT_H=15, CT_OV=7;
+  const WALL_H=78, GAP_H=48;
+  const base_bot=FLOOR_Y, base_top=base_bot-BASE_H;
+  const ct_bot=base_top, ct_top=ct_bot-CT_H;
+  const wall_bot=ct_top-GAP_H, wall_top=wall_bot-WALL_H;
+  const sch={
+    wit:      {f:'#F4F3F0',s:'#DCDAD6',e:'#C4C2BE',h:'#9A9A9A'},
+    antraciet:{f:'#3A3A3A',s:'#282828',e:'#1C1C1C',h:'#7A7A7A'},
+    naturel:  {f:'#C49260',s:'#A87040',e:'#8A5428',h:'#5A3018'},
+    donker:   {f:'#5C3C1E',s:'#3E2810',e:'#2A1808',h:'#8B6040'},
+    salige:   {f:'#7A9E7E',s:'#5A7E5E',e:'#426248',h:'#3A5240'},
+    navy:     {f:'#2B3C68',s:'#1E2C50',e:'#121C38',h:'#8899BB'}
+  };
+  const p=sch[state.color]||sch.wit;
+  const ctF=state.options.has('graniet')?'#606060':state.options.has('quartz')?'#E0DCDA':state.options.has('hout')?'#C49060':'#D8D4CF';
+  const ctT=state.options.has('graniet')?'#505050':state.options.has('quartz')?'#D0CCCA':state.options.has('hout')?'#B47838':'#C8C4BF';
+  const isGloss=state.finish==='hoogglans', isWood=state.finish==='houtnerf';
+  const doorFill=isWood?'url(#vW)':p.f;
+  function rc(x,y,w,h,fill,str='none',sw=1,rx=0){return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" stroke="${str}" stroke-width="${sw}" rx="${rx}"/>`;}
+  function pg(pts,fill,str='none',sw=1){return `<polygon points="${pts}" fill="${fill}" stroke="${str}" stroke-width="${sw}"/>`;}
+  function ln(x1,y1,x2,y2,str,sw=1,ex=''){return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${str}" stroke-width="${sw}" ${ex}/>`;}
+  let s=`<defs>
+    <linearGradient id="vWall2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EDEAE4"/><stop offset="100%" stop-color="#F3F0EC"/></linearGradient>
+    <linearGradient id="vFlr" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D0C8B6"/><stop offset="100%" stop-color="#C4B8A4"/></linearGradient>`;
+  if(isGloss) s+=`<linearGradient id="vGl" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,.38)"/><stop offset="35%" stop-color="rgba(255,255,255,.07)"/><stop offset="100%" stop-color="rgba(0,0,0,.07)"/></linearGradient>`;
+  if(isWood) s+=`<pattern id="vW" x="0" y="0" width="34" height="400" patternUnits="userSpaceOnUse"><rect width="34" height="400" fill="${p.f}"/><line x1="4" y1="0" x2="5" y2="400" stroke="rgba(0,0,0,.07)" stroke-width="1.4"/><line x1="11" y1="0" x2="10" y2="400" stroke="rgba(0,0,0,.05)" stroke-width="1"/><line x1="19" y1="0" x2="20" y2="400" stroke="rgba(0,0,0,.06)" stroke-width="1.1"/><line x1="28" y1="0" x2="27" y2="400" stroke="rgba(0,0,0,.04)" stroke-width=".8"/></pattern>`;
+  s+=`</defs>`;
+  // room bg
+  s+=rc(0,0,VW,VH,'url(#vWall2)');
+  // floor
+  s+=pg(`${L-5},${FLOOR_Y} ${R+5},${FLOOR_Y} ${R+5+dX},${FLOOR_Y+dY} ${L-5+dX},${FLOOR_Y+dY}`,'url(#vFlr)');
+  s+=rc(L-5,FLOOR_Y,FW+10,VH-FLOOR_Y,'#C8BEA8');
+  // backsplash
+  s+=rc(L,wall_bot,FW,GAP_H,'#DDD8D0');
+  for(let tx=L;tx<R;tx+=38) s+=ln(tx,wall_bot,tx,ct_top,'rgba(255,255,255,.55)',.5);
+  for(let ty=wall_bot+19;ty<ct_top;ty+=19) s+=ln(L,ty,R,ty,'rgba(255,255,255,.55)',.5);
+  // wall cabs: top surf
+  s+=pg(`${L},${wall_top} ${R},${wall_top} ${R+dX},${wall_top-dY} ${L+dX},${wall_top-dY}`,p.s);
+  s+=pg(`${R},${wall_top} ${R},${wall_bot} ${R+dX},${wall_bot-dY} ${R+dX},${wall_top-dY}`,p.e);
+  s+=rc(L,wall_top,FW,WALL_H,doorFill,p.e,1);
+  if(isGloss) s+=rc(L,wall_top,FW,WALL_H*.32,'url(#vGl)');
+  const wallN=Math.max(2,Math.round(state.width/55));
+  for(let i=0;i<=wallN;i++) s+=ln(L+FW/wallN*i,wall_top,L+FW/wallN*i,wall_bot,p.e,1.4);
+  for(let i=0;i<wallN;i++){const wx=L+FW/wallN*i,ww=FW/wallN,pd=8;s+=rc(wx+pd,wall_top+pd,ww-pd*2,WALL_H-pd*2,'none',p.e,.65,1);if(state.options.has('grepen'))s+=ln(wx+ww*.28,wall_bot-13,wx+ww*.72,wall_bot-13,p.h,2.5,'stroke-linecap="round"');}
+  // counter top
+  s+=pg(`${L-CT_OV},${ct_top} ${R+CT_OV},${ct_top} ${R+CT_OV+dX},${ct_top-dY} ${L-CT_OV+dX},${ct_top-dY}`,ctT);
+  s+=pg(`${R+CT_OV},${ct_top} ${R+CT_OV},${ct_bot} ${R+CT_OV+dX},${ct_bot-dY} ${R+CT_OV+dX},${ct_top-dY}`,ctF);
+  s+=rc(L-CT_OV,ct_top,FW+CT_OV*2,CT_H,ctF,'#A8A49E',.5);
+  // induction hob
+  if(state.appliances.has('inductie')){const hx=L+FW*.34,hy=ct_top+2,hw=FW*.22,hh=11;s+=rc(hx,hy,hw,hh,'#1A1818','#111',.5,2);[.18,.40,.62,.84].forEach(rx=>s+=`<ellipse cx="${(hx+hw*rx).toFixed(1)}" cy="${(hy+hh*.5).toFixed(1)}" rx="3" ry="2.6" fill="none" stroke="#E55" stroke-width="1.3"/>`);}
+  // range hood
+  if(state.appliances.has('afzuigkap')){const hx=L+FW*.28,hw=FW*.3,hy=wall_bot-19;s+=`<polygon points="${hx},${hy} ${hx+hw},${hy} ${hx+hw*.83},${hy+17} ${hx+hw*.17},${hy+17}" fill="#8A8A8A" stroke="#666" stroke-width=".5"/>`;s+=rc(hx+hw*.17,hy+17,hw*.66,5,'#AAAAAA','#888',.4);}
+  // base cabs
+  const TOE_H=20;
+  s+=pg(`${R},${base_top} ${R},${base_bot} ${R+dX},${base_bot-dY} ${R+dX},${base_top-dY}`,p.e);
+  s+=rc(L,base_top,FW,BASE_H,doorFill,p.e,1);
+  if(isGloss) s+=rc(L,base_top,FW,BASE_H*.22,'url(#vGl)');
+  s+=rc(L,base_bot-TOE_H,FW,TOE_H,p.e,p.e,.4);
+  const cabs=state.cabinets.length?state.cabinets:[{type:'Base',W:600,notes:''}];
+  const totW=cabs.reduce((a,c)=>a+c.W,0)||1;
+  const faceH=BASE_H-TOE_H;
+  let xOff=0;
+  cabs.forEach((cab,i)=>{
+    const cx=L+(xOff/totW)*FW, cw=(cab.W/totW)*FW, pd=7;
+    if(i>0) s+=ln(cx,base_top,cx,base_bot-TOE_H,p.e,1.4);
+    if(cab.type==='Tall'){s+=rc(cx+pd,base_top+pd,cw-pd*2,faceH*.46-pd,'none',p.e,.65,1);s+=rc(cx+pd,base_top+faceH*.5,cw-pd*2,faceH*.47-pd,'none',p.e,.65,1);}
+    else s+=rc(cx+pd,base_top+pd,cw-pd*2,faceH-pd*2,'none',p.e,.65,1);
+    const hy=base_bot-TOE_H-20;
+    if(state.options.has('grepen')) s+=ln(cx+cw*.24,hy,cx+cw*.76,hy,p.h,3,'stroke-linecap="round"');
+    else if(!state.options.has('pushopen')) s+=`<circle cx="${(cx+cw*.5).toFixed(1)}" cy="${hy.toFixed(1)}" r="2.8" fill="${p.h}"/>`;
+    xOff+=cab.W;
+  });
+  s+=ln(R,base_top,R,base_bot-TOE_H,p.e,1.4);
+  // LED strip
+  if(state.options.has('led')){s+=ln(L,wall_bot,R,wall_bot,'rgba(255,242,150,.95)',2.5);s+=ln(L,wall_bot,R,wall_bot,'rgba(255,238,120,.22)',14);}
+  // labels
+  const styleName=STYLES.find(x=>x.id===state.style)?.name||'';
+  const colorName=COLORS.find(x=>x.id===state.color)?.name||'';
+  const finName=FINISHES.find(x=>x.id===state.finish)?.name||'';
+  s+=`<text x="${L+4}" y="${wall_top-8}" font-family="Playfair Display,serif" font-size="10" fill="#999" font-style="italic">${styleName} · ${colorName} · ${finName}</text>`;
+  s+=`<text x="${L+FW/2}" y="${VH-7}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#999">${state.width} × ${state.depth} × ${state.height} cm</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VW} ${VH}" style="width:100%;height:auto;display:block;border-radius:6px">${s}</svg>`;
+}
+
+/* ═══════════════════════════════════════════════
    AI VISUALIZATION
 ═══════════════════════════════════════════════ */
 async function runAIViz() {
@@ -1728,7 +1819,15 @@ async function runAIViz() {
 
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Genereren...';
-  res.classList.remove('show');
+
+  // Show SVG sketch immediately
+  res.innerHTML = `
+    <div style="margin-bottom:1rem;border-radius:6px;overflow:hidden">${kitchenVizSVG()}</div>
+    <div id="aiTextZone" style="display:flex;align-items:center;gap:.6rem;color:#9CA3AF;font-size:.83rem;padding:.4rem 0">
+      <span class="spinner" style="border-color:rgba(255,255,255,.18);border-top-color:#A78BFA;width:12px;height:12px"></span>
+      AI beschrijving laden...
+    </div>`;
+  res.classList.add('show');
 
   const styleData  = STYLES.find(s=>s.id===state.style)||STYLES[0];
   const layoutData = LAYOUTS.find(l=>l.id===state.layout)||LAYOUTS[0];
@@ -1753,10 +1852,10 @@ Reageer UITSLUITEND met geldige JSON in dit formaat (geen extra tekst):
   "title": "Korte pakkende titel (max 8 woorden)",
   "description": "Sfeervolle beschrijving van het ontwerp (2-3 zinnen)",
   "highlights": ["Kenmerk 1", "Kenmerk 2", "Kenmerk 3", "Kenmerk 4"],
-  "advice": "Praktisch interieuradvies voor dit ontwerp (1-2 zinnen)",
-  "imagePrompt": "Gedetailleerde Engelse prompt voor een AI beeldgenerator (max 50 woorden)"
+  "advice": "Praktisch interieuradvies voor dit ontwerp (1-2 zinnen)"
 }`;
 
+  const textZone = document.getElementById('aiTextZone');
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1780,23 +1879,18 @@ Reageer UITSLUITEND met geldige JSON in dit formaat (geen extra tekst):
 
     const data = await resp.json();
     const text = data.content?.[0]?.text || '';
-
-    // Extract JSON
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Geen geldige JSON in antwoord');
     const design = JSON.parse(jsonMatch[0]);
 
-    res.innerHTML = `
-      <h3>${escHtml(design.title||'Ontwerp')}</h3>
+    textZone.innerHTML = `
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#A78BFA;margin-bottom:.4rem">${escHtml(design.title||'Ontwerp')}</h3>
       <div class="ai-desc">${escHtml(design.description||'')}</div>
       <div class="ai-hl-label">Kenmerken</div>
       <ul class="ai-hl">${(design.highlights||[]).map(h=>`<li>${escHtml(h)}</li>`).join('')}</ul>
-      <div class="ai-advice"><strong style="color:var(--oak-lt);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.25rem">Advies</strong>${escHtml(design.advice||'')}</div>
-      ${design.imagePrompt?`<div style="margin-top:.75rem;padding:.6rem .8rem;background:rgba(255,255,255,.06);border-radius:6px;font-size:.75rem;color:#6B7280"><div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:#555;margin-bottom:.25rem">Image prompt</div>${escHtml(design.imagePrompt)}</div>`:''}`;
-    res.classList.add('show');
+      <div class="ai-advice"><strong style="color:var(--oak-lt);font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:.25rem">Advies</strong>${escHtml(design.advice||'')}</div>`;
   } catch(e) {
-    res.innerHTML = `<div style="color:#FC8181;font-size:.85rem">Fout: ${escHtml(e.message)}</div>`;
-    res.classList.add('show');
+    textZone.innerHTML = `<div style="color:#FC8181;font-size:.85rem">Fout bij AI beschrijving: ${escHtml(e.message)}</div>`;
   }
 
   btn.disabled = false;
