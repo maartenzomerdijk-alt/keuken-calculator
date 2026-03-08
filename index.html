@@ -394,6 +394,15 @@ table.dt .tr-tot td{background:var(--cream-dk);font-weight:600;border-top:2px so
     </div>
   </div>
 
+  <div class="acc" id="acc-H">
+    <div class="acc-hd open" onclick="togAcc('acc-H')"><div class="acc-hd-left"><span class="acc-badge">2H</span>Cabinet Vision export (.ordx)</div><span class="acc-chev">&#8964;</span></div>
+    <div class="acc-body" id="acc-H-body">
+      <p style="font-size:.83rem;color:var(--char-lt);margin-bottom:.65rem">Importeer dit bestand rechtstreeks in Cabinet Vision 2025. Bevat alle kasten met afmetingen, materiaalcodes, scharnieren en deelindeling.</p>
+      <pre class="xilog-pre" id="ordxPre" style="max-height:320px"></pre>
+      <button class="btn-exp" onclick="dlOrdx()" style="margin-top:.65rem">&#8595; Download .ordx bestand</button>
+    </div>
+  </div>
+
 </div><!-- prod-wrap -->
 </div><!-- tab-prod -->
 
@@ -518,6 +527,7 @@ const state = {
   edgeBanding: [],
   cncTime:  {},
   xilogCode:'',
+  ordxCode: '',
   // sort
   cabSort: {col:'id',asc:true},
   partsSort:{col:'id',asc:true}
@@ -1022,6 +1032,210 @@ function generateXilog() {
 }
 
 /* ═══════════════════════════════════════════════
+   ORDX GENERATION  (Cabinet Vision import)
+═══════════════════════════════════════════════ */
+function generateOrdx() {
+  const PANEL_W = 19;
+
+  // Material schedule codes derived from color + finish selection
+  const colorCodes  = {wit:'W980', antraciet:'A980', naturel:'N220', donker:'D180', salige:'S380', navy:'B240'};
+  const finishCodes = {mat:'ST7', hoogglans:'GL1', houtnerf:'ST9'};
+  const cc = colorCodes[state.color]   || 'W980';
+  const fc = finishCodes[state.finish] || 'ST7';
+  const matBody = `CONF_${cc}_${fc}`;
+  const matDoor = `A19_${cc}_${fc}`;
+
+  const hingeSchedule = state.options.has('softclose')
+    ? 'Blumotion AP / S-AP (INSERTA)'
+    : 'Standard AP (INSERTA)';
+
+  const totalCabW = state.cabinets.reduce((s,c)=>s+c.W, 0);
+  const date = new Date().toISOString().slice(0,10);
+  const jobName = `Keuken ${state.width}x${state.depth}x${state.height}cm – ${STYLES.find(s=>s.id===state.style)?.name||''}`;
+
+  function x(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function panelAssembly(posX, H) {
+    return [
+      `\t\t\t\t\t\t<Assembly>`,
+      `\t\t\t\t\t\t\t<Catalog>KeukenLab</Catalog>`,
+      `\t\t\t\t\t\t\t<Properties>`,
+      `\t\t\t\t\t\t\t\t<General>`,
+      `\t\t\t\t\t\t\t\t\t<Name>Zijpaneel</Name>`,
+      `\t\t\t\t\t\t\t\t\t<Size>`,
+      `\t\t\t\t\t\t\t\t\t\t<Width>${PANEL_W}</Width>`,
+      `\t\t\t\t\t\t\t\t\t\t<Depth>${state.depth*10}</Depth>`,
+      `\t\t\t\t\t\t\t\t\t\t<Height>${H}</Height>`,
+      `\t\t\t\t\t\t\t\t\t</Size>`,
+      `\t\t\t\t\t\t\t\t</General>`,
+      `\t\t\t\t\t\t\t\t<Construction><Cabinet>AM - CF - CONF - DRESS</Cabinet></Construction>`,
+      `\t\t\t\t\t\t\t\t<Materials>`,
+      `\t\t\t\t\t\t\t\t\t<UpperMaterialSchedules><Standard>${matBody}</Standard><ExposedInterior>${matBody}</ExposedInterior></UpperMaterialSchedules>`,
+      `\t\t\t\t\t\t\t\t\t<BaseMaterialSchedules><Standard>${matBody}</Standard><ExposedInterior>${matBody}</ExposedInterior></BaseMaterialSchedules>`,
+      `\t\t\t\t\t\t\t\t</Materials>`,
+      `\t\t\t\t\t\t\t\t<Toe><ToeHeight>100</ToeHeight></Toe>`,
+      `\t\t\t\t\t\t\t</Properties>`,
+      `\t\t\t\t\t\t\t<Position><X>${posX}</X></Position>`,
+      `\t\t\t\t\t\t</Assembly>`
+    ].join('\n');
+  }
+
+  function cabinetAssembly(cab, posX) {
+    const isTall  = cab.type === 'Tall';
+    const cabName = cab.notes || (isTall ? 'Hoge kast' : 'Onderkast');
+    const toeH    = isTall ? 0 : 100;
+    const hasDoor = !String(cab.notes).includes('Vaatwasser');
+    const splitPos = Math.round(cab.W / 2);
+
+    const doorsBlock = hasDoor ? [
+      `\t\t\t\t\t\t\t\t<Hardware><HingeSchedule>${x(hingeSchedule)}</HingeSchedule></Hardware>`,
+      `\t\t\t\t\t\t\t\t<Doors>`,
+      `\t\t\t\t\t\t\t\t\t<All><Style>Porte UNIE</Style><Material>${matDoor}</Material><Catalog>Porte</Catalog></All>`,
+      `\t\t\t\t\t\t\t\t\t<Base><Style>Porte UNIE</Style><Material>${matDoor}</Material><Catalog>Porte</Catalog></Base>`,
+      `\t\t\t\t\t\t\t\t\t<BaseEp><Style>Porte UNIE</Style><Material>${matDoor}</Material><Catalog>Porte</Catalog></BaseEp>`,
+      `\t\t\t\t\t\t\t\t</Doors>`
+    ].join('\n') : '';
+
+    let sectionsBlock = '';
+    if (hasDoor) {
+      if (cab.W > 600) {
+        // Double door: Pair + single door with left hinge
+        sectionsBlock = [
+          `\t\t\t\t\t\t\t<Sections>`,
+          `\t\t\t\t\t\t\t\t<Section Side="1" Type="e">`,
+          `\t\t\t\t\t\t\t\t\t<Split Direction="v">`,
+          `\t\t\t\t\t\t\t\t\t\t<Position>${splitPos}</Position>`,
+          `\t\t\t\t\t\t\t\t\t\t<Face1><Type>Pair</Type><Dimensions/><Door/></Face1>`,
+          `\t\t\t\t\t\t\t\t\t\t<Face2><Type>Door</Type><Dimensions/><Door><Hinge>L</Hinge></Door></Face2>`,
+          `\t\t\t\t\t\t\t\t\t</Split>`,
+          `\t\t\t\t\t\t\t\t</Section>`,
+          `\t\t\t\t\t\t\t\t<Section Side="1" Type="i">`,
+          `\t\t\t\t\t\t\t\t\t<Split Direction="v">`,
+          `\t\t\t\t\t\t\t\t\t\t<Type>Partition</Type>`,
+          `\t\t\t\t\t\t\t\t\t\t<Position>${splitPos}</Position>`,
+          `\t\t\t\t\t\t\t\t\t\t<Open1><Dimensions/></Open1>`,
+          `\t\t\t\t\t\t\t\t\t\t<Open2><Dimensions/></Open2>`,
+          `\t\t\t\t\t\t\t\t\t</Split>`,
+          `\t\t\t\t\t\t\t\t</Section>`,
+          `\t\t\t\t\t\t\t</Sections>`
+        ].join('\n');
+      } else {
+        // Single door with right hinge
+        sectionsBlock = [
+          `\t\t\t\t\t\t\t<Sections>`,
+          `\t\t\t\t\t\t\t\t<Section Side="1" Type="e">`,
+          `\t\t\t\t\t\t\t\t\t<Door><Hinge>R</Hinge></Door>`,
+          `\t\t\t\t\t\t\t\t</Section>`,
+          `\t\t\t\t\t\t\t</Sections>`
+        ].join('\n');
+      }
+    }
+
+    const attrBlock = cab.W > 600 ? [
+      `\t\t\t\t\t\t\t\t<Attributes>`,
+      `\t\t\t\t\t\t\t\t\t<Parameter><Name>ORDX_SystemAssemblage</Name><Type>I</Type><Value>1</Value></Parameter>`,
+      `\t\t\t\t\t\t\t\t</Attributes>`
+    ].join('\n') : '';
+
+    return [
+      `\t\t\t\t\t\t<Assembly>`,
+      `\t\t\t\t\t\t\t<Catalog>KeukenLab</Catalog>`,
+      `\t\t\t\t\t\t\t<Properties>`,
+      `\t\t\t\t\t\t\t\t<General>`,
+      `\t\t\t\t\t\t\t\t\t<Name>${x(cabName)}</Name>`,
+      `\t\t\t\t\t\t\t\t\t<Size>`,
+      `\t\t\t\t\t\t\t\t\t\t<Width>${cab.W}</Width>`,
+      `\t\t\t\t\t\t\t\t\t\t<Depth>${cab.D}</Depth>`,
+      `\t\t\t\t\t\t\t\t\t\t<Height>${cab.H}</Height>`,
+      `\t\t\t\t\t\t\t\t\t</Size>`,
+      `\t\t\t\t\t\t\t\t</General>`,
+      `\t\t\t\t\t\t\t\t<Construction><Cabinet>AM - CF - CONF - DRESS</Cabinet></Construction>`,
+      `\t\t\t\t\t\t\t\t<Materials>`,
+      `\t\t\t\t\t\t\t\t\t<UpperMaterialSchedules><Standard>${matBody}</Standard><ExposedInterior>${matBody}</ExposedInterior></UpperMaterialSchedules>`,
+      `\t\t\t\t\t\t\t\t\t<BaseMaterialSchedules><Standard>${matBody}</Standard><ExposedInterior>${matBody}</ExposedInterior></BaseMaterialSchedules>`,
+      `\t\t\t\t\t\t\t\t</Materials>`,
+      doorsBlock,
+      `\t\t\t\t\t\t\t\t<Toe><ToeHeight>${toeH}</ToeHeight></Toe>`,
+      attrBlock,
+      `\t\t\t\t\t\t\t</Properties>`,
+      `\t\t\t\t\t\t\t<Position><X>${posX}</X></Position>`,
+      `\t\t\t\t\t\t\t<Sides/>`,
+      sectionsBlock,
+      `\t\t\t\t\t\t\t<Modifications>`,
+      `\t\t\t\t\t\t\t\t<DefaultAssembly>`,
+      `\t\t\t\t\t\t\t\t\t<RemoveShapeTemplates>1</RemoveShapeTemplates>`,
+      `\t\t\t\t\t\t\t\t\t<RemoveUserModifiedParameters>1</RemoveUserModifiedParameters>`,
+      `\t\t\t\t\t\t\t\t</DefaultAssembly>`,
+      `\t\t\t\t\t\t\t</Modifications>`,
+      `\t\t\t\t\t\t</Assembly>`
+    ].filter(Boolean).join('\n');
+  }
+
+  // Build assemblies list
+  const firstH = state.cabinets[0]?.H || CONFIG.BASE_CABINET_H;
+  const lastH  = state.cabinets[state.cabinets.length-1]?.H || CONFIG.BASE_CABINET_H;
+
+  const asmParts = [];
+  asmParts.push(panelAssembly(-PANEL_W, firstH));
+
+  let curX = 0;
+  state.cabinets.forEach(cab => {
+    asmParts.push(cabinetAssembly(cab, curX));
+    curX += cab.W;
+  });
+
+  asmParts.push(panelAssembly(curX, lastH));
+
+  const wallEnd = curX + PANEL_W;
+  const depthMm = state.depth * 10;
+
+  const xml = [
+    `<?xml version="1.0" encoding="UTF-8"?>`,
+    `<Job>`,
+    `\t<ProductVersion>2025</ProductVersion>`,
+    `\t<Unit>mm</Unit>`,
+    `\t<Properties>`,
+    `\t\t<Job>`,
+    `\t\t\t<Information><Job><Name>${x(jobName)}</Name></Job></Information>`,
+    `\t\t\t<Attributes>`,
+    `\t\t\t\t<Parameter><Name>COMMENT</Name><Type>T</Type><Value>Gegenereerd door KeukenLab op ${date}</Value></Parameter>`,
+    `\t\t\t</Attributes>`,
+    `\t\t</Job>`,
+    `\t</Properties>`,
+    `\t<Rooms>`,
+    `\t\t<Room>`,
+    `\t\t\t<Walls>`,
+    `\t\t\t\t<Wall>`,
+    `\t\t\t\t\t<Number>1</Number>`,
+    `\t\t\t\t\t<Position>`,
+    `\t\t\t\t\t\t<StartX>-${PANEL_W}.000</StartX>`,
+    `\t\t\t\t\t\t<StartY>-${depthMm}.000</StartY>`,
+    `\t\t\t\t\t\t<Angle>0.000000</Angle>`,
+    `\t\t\t\t\t\t<EndX>${wallEnd}.000</EndX>`,
+    `\t\t\t\t\t\t<EndY>-${depthMm}.000</EndY>`,
+    `\t\t\t\t\t</Position>`,
+    `\t\t\t\t\t<Assemblies>`,
+    asmParts.join('\n'),
+    `\t\t\t\t\t</Assemblies>`,
+    `\t\t\t\t</Wall>`,
+    `\t\t\t</Walls>`,
+    `\t\t</Room>`,
+    `\t</Rooms>`,
+    `</Job>`
+  ].join('\n');
+
+  state.ordxCode = xml;
+}
+
+function dlOrdx() {
+  const date = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const a = document.createElement('a');
+  a.href = 'data:application/xml;charset=utf-8,' + encodeURIComponent(state.ordxCode);
+  a.download = `keuken_${date}.ordx`;
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════
    PRICING
 ═══════════════════════════════════════════════ */
 function calcPrice() {
@@ -1357,6 +1571,17 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+/* ─── 2H: Cabinet Vision .ordx preview ─── */
+function renderOrdx() {
+  const pre = document.getElementById('ordxPre');
+  if (!pre) return;
+  // Simple syntax highlighting for XML
+  const highlighted = escHtml(state.ordxCode)
+    .replace(/(&lt;\/?[\w]+)/g, '<span style="color:#79C0FF">$1</span>')
+    .replace(/(=&quot;[^&]*&quot;)/g, '<span style="color:#E3B341">$1</span>');
+  pre.innerHTML = highlighted;
+}
+
 function dlXilog() {
   const a = document.createElement('a');
   a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(state.xilogCode);
@@ -1473,6 +1698,7 @@ function recalculate() {
   calcEdgeBanding();
   calcCNCTime();
   generateXilog();
+  generateOrdx();
 
   // Render
   drawFloorPlan();
@@ -1483,6 +1709,7 @@ function recalculate() {
   renderEdge();
   renderCNC();
   renderXilog();
+  renderOrdx();
   renderMaterial();
 }
 
