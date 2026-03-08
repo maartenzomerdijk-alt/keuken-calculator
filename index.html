@@ -1,477 +1,241 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Keuken Offerte Calculator</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuken Offerte &amp; Ontwerp Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F6F1E8;--cream-dark:#EDE6D7;
+  --oak:#C4935A;--oak-dark:#A87540;--oak-light:#DEBB90;--oak-muted:rgba(196,147,90,.13);
+  --text:#2A2016;--text-muted:#7A6E5D;
+  --border:#D9CFBE;--white:#FEFCF7;
+  --error:#B03030;--error-bg:#FDF0EF;
+  --warn:#A06010;--warn-bg:#FEF8EC;
+  --disabled:#BEB5A8;
+  --shadow:0 2px 14px rgba(42,32,22,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;line-height:1.6}
 
-    :root {
-      --cream:       #F6F1E8;
-      --cream-dark:  #EDE6D7;
-      --oak:         #C4935A;
-      --oak-dark:    #A87540;
-      --oak-light:   #DEBB90;
-      --oak-muted:   rgba(196,147,90,.12);
-      --text:        #2A2016;
-      --text-muted:  #7A6E5D;
-      --border:      #D9CFBE;
-      --white:       #FEFCF7;
-      --error:       #B03030;
-      --error-bg:    #FDF0EF;
-      --warn:        #A06010;
-      --warn-bg:     #FEF8EC;
-      --disabled:    #BEB5A8;
-      --shadow:      0 2px 12px rgba(42,32,22,.07);
-    }
+/* ── API Bar ── */
+.api-bar{background:var(--text);padding:.6rem 2rem;display:flex;align-items:center;gap:.75rem;font-size:.8rem;color:rgba(255,255,255,.7)}
+.api-bar label{white-space:nowrap;color:rgba(255,255,255,.85);font-weight:500}
+.api-bar input{flex:1;max-width:340px;padding:.35rem .7rem;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.08);color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none}
+.api-bar input::placeholder{color:rgba(255,255,255,.35)}
+.api-bar input:focus{border-color:var(--oak-light)}
+.api-key-hint{font-size:.75rem;color:rgba(255,255,255,.45)}
 
-    html { scroll-behavior: smooth; }
+/* ── Header ── */
+.site-header{background:var(--white);border-bottom:2px solid var(--oak-light);padding:1.1rem 2rem;display:flex;align-items:center;gap:1rem}
+.logo-mark{width:46px;height:46px;background:var(--oak);border-radius:10px;display:grid;place-items:center;flex-shrink:0;font-size:1.4rem;color:#fff}
+.site-header h1{font-family:'Playfair Display',serif;font-size:1.5rem;line-height:1.2}
+.site-header p{font-size:.8rem;color:var(--text-muted)}
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--text);
-      min-height: 100vh;
-      line-height: 1.6;
-    }
+/* ── Layout ── */
+.app{display:flex;max-width:1360px;margin:0 auto;padding:2rem 1.75rem;gap:2rem;align-items:flex-start}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;gap:1.5rem}
+.sidebar{width:360px;flex-shrink:0;position:sticky;top:1.5rem}
 
-    /* ── Header ─────────────────────────────── */
-    .site-header {
-      background: var(--white);
-      border-bottom: 2px solid var(--oak-light);
-      padding: 1.1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .logo-mark {
-      width: 46px; height: 46px;
-      background: var(--oak);
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      font-size: 1.4rem;
-      color: #fff;
-    }
-    .site-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.5rem;
-      line-height: 1.2;
-    }
-    .site-header p {
-      font-size: .8rem;
-      color: var(--text-muted);
-    }
+/* ── Step card ── */
+.step{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.step-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;gap:.8rem}
+.step-num{width:30px;height:30px;background:var(--oak);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+.step-title{font-family:'Playfair Display',serif;font-size:1.15rem}
+.step-body{padding:1.5rem}
 
-    /* ── Layout ──────────────────────────────── */
-    .app {
-      display: flex;
-      max-width: 1360px;
-      margin: 0 auto;
-      padding: 2rem 1.75rem;
-      gap: 2rem;
-      align-items: flex-start;
-    }
-    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1.5rem; }
-    .sidebar { width: 360px; flex-shrink: 0; position: sticky; top: 1.5rem; }
+/* ── Style cards ── */
+.style-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.style-card{position:relative;border:2px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;background:var(--cream);transition:border-color .2s,background .2s,box-shadow .2s;user-select:none}
+.style-card:hover{border-color:var(--oak-light);background:var(--white)}
+.style-card.selected{border-color:var(--oak);background:var(--white);box-shadow:0 0 0 4px var(--oak-muted)}
+.style-card-icon{font-size:1.6rem;margin-bottom:.4rem;line-height:1}
+.style-card-name{font-family:'Playfair Display',serif;font-size:1.05rem}
+.style-card-desc{font-size:.78rem;color:var(--text-muted);margin:.2rem 0 .5rem}
+.style-card-price{font-size:.82rem;font-weight:600;color:var(--oak)}
+.check-mark{position:absolute;top:.7rem;right:.7rem;width:22px;height:22px;background:var(--oak);border-radius:50%;display:grid;place-items:center;color:#fff;font-size:.7rem;opacity:0;transition:opacity .2s}
+.style-card.selected .check-mark{opacity:1}
 
-    /* ── Step card ───────────────────────────── */
-    .step {
-      background: var(--white);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .step-head {
-      padding: 1.2rem 1.5rem;
-      border-bottom: 1px solid var(--cream-dark);
-      display: flex;
-      align-items: center;
-      gap: .8rem;
-    }
-    .step-num {
-      width: 30px; height: 30px;
-      background: var(--oak);
-      color: #fff;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: .8rem;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .step-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
-    }
-    .step-body { padding: 1.5rem; }
+/* ── Dimensions ── */
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.form-group{display:flex;flex-direction:column;gap:.35rem}
+label{font-size:.85rem;font-weight:500}
+.input-wrap{position:relative}
+input[type="number"],select{width:100%;padding:.65rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.95rem;background:var(--cream);color:var(--text);outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none}
+input[type="number"]:focus,select:focus{border-color:var(--oak)}
+input.has-error{border-color:var(--error)!important}
+.input-unit{position:absolute;right:.8rem;top:50%;transform:translateY(-50%);font-size:.78rem;color:var(--text-muted);pointer-events:none}
+.field-msg{font-size:.78rem;min-height:1.1em;line-height:1.3}
+.field-msg.err{color:var(--error)}
+.field-msg.warn{color:var(--warn);background:var(--warn-bg);padding:.35rem .6rem;border-radius:6px;border-left:3px solid var(--warn)}
+.btn-group{display:flex;gap:.5rem}
+.btn-pill{flex:1;padding:.65rem .4rem;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--text);text-align:center;transition:all .2s}
+.btn-pill:hover{border-color:var(--oak-light)}
+.btn-pill.selected{border-color:var(--oak);background:var(--white);color:var(--oak);font-weight:600}
+.setup-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+.setup-card{border:1.5px solid var(--border);border-radius:10px;padding:.8rem 1rem;cursor:pointer;background:var(--cream);text-align:left;font-family:'DM Sans',sans-serif;transition:all .2s}
+.setup-card:hover{border-color:var(--oak-light);background:var(--white)}
+.setup-card.selected{border-color:var(--oak);background:var(--white)}
+.setup-name{font-size:.9rem;font-weight:600;display:block}
+.setup-desc{font-size:.75rem;color:var(--text-muted)}
+.setup-extra{font-size:.75rem;color:var(--oak);font-weight:600}
 
-    /* ── Style cards ─────────────────────────── */
-    .style-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-    .style-card {
-      position: relative;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 1.2rem;
-      cursor: pointer;
-      background: var(--cream);
-      transition: border-color .2s, background .2s, box-shadow .2s;
-      user-select: none;
-    }
-    .style-card:hover { border-color: var(--oak-light); background: var(--white); }
-    .style-card.selected {
-      border-color: var(--oak);
-      background: var(--white);
-      box-shadow: 0 0 0 4px var(--oak-muted);
-    }
-    .style-card-icon { font-size: 1.6rem; margin-bottom: .4rem; line-height: 1; }
-    .style-card-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
-    .style-card-desc { font-size: .78rem; color: var(--text-muted); margin: .2rem 0 .5rem; }
-    .style-card-price { font-size: .82rem; font-weight: 600; color: var(--oak); }
-    .check-mark {
-      position: absolute;
-      top: .7rem; right: .7rem;
-      width: 22px; height: 22px;
-      background: var(--oak);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      font-size: .7rem;
-      opacity: 0;
-      transition: opacity .2s;
-    }
-    .style-card.selected .check-mark { opacity: 1; }
+/* ── Toggles ── */
+.toggle-list{display:flex;flex-direction:column;gap:.7rem}
+.toggle-item{display:flex;align-items:flex-start;gap:.75rem;padding:.9rem 1rem;border:1.5px solid var(--border);border-radius:11px;background:var(--cream);cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.toggle-item:hover:not(.is-disabled){border-color:var(--oak-light);background:var(--white)}
+.toggle-item.is-selected{border-color:var(--oak);background:var(--white)}
+.toggle-item.is-hidden{display:none}
+.toggle-item.is-disabled{opacity:.5;cursor:not-allowed;background:var(--cream-dark)}
+.sw{width:42px;height:24px;background:var(--border);border-radius:12px;position:relative;flex-shrink:0;margin-top:2px;transition:background .2s}
+.sw::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.toggle-item.is-selected .sw{background:var(--oak)}
+.toggle-item.is-selected .sw::after{left:21px}
+.toggle-content{flex:1;min-width:0}
+.toggle-name{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.toggle-desc{font-size:.78rem;color:var(--text-muted);margin-top:.1rem}
+.toggle-reason{font-size:.74rem;color:var(--text-muted);font-style:italic;margin-top:.15rem}
+.toggle-price{font-size:.85rem;font-weight:600;color:var(--oak);white-space:nowrap;margin-top:2px}
+.badge{font-size:.68rem;padding:.12rem .45rem;border-radius:20px;font-weight:500;line-height:1.5}
+.badge-rec{background:rgba(196,147,90,.14);color:var(--oak-dark);border:1px solid var(--oak-light)}
 
-    /* ── Dimensions ──────────────────────────── */
-    .dim-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-    .form-group { display: flex; flex-direction: column; gap: .35rem; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: .85rem; font-weight: 500; }
+/* ── Step 5 – Color & Finish ── */
+.color-grid{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.color-swatch{display:flex;flex-direction:column;align-items:center;gap:.35rem;cursor:pointer}
+.color-dot{width:42px;height:42px;border-radius:50%;border:2.5px solid transparent;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.color-swatch:hover .color-dot{transform:scale(1.1)}
+.color-swatch.selected .color-dot{border-color:var(--oak);box-shadow:0 0 0 3px var(--oak-muted),0 2px 6px rgba(0,0,0,.15)}
+.color-swatch span{font-size:.72rem;color:var(--text-muted);text-align:center}
+.color-swatch.selected span{color:var(--oak);font-weight:600}
+.finish-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.finish-btn{flex:1;min-width:110px;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;transition:all .2s}
+.finish-btn:hover{border-color:var(--oak-light);background:var(--white)}
+.finish-btn.selected{border-color:var(--oak);background:var(--white)}
+.finish-btn-name{font-size:.88rem;font-weight:600;display:block}
+.finish-btn-desc{font-size:.73rem;color:var(--text-muted)}
+.wishes-wrap textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.9rem;background:var(--cream);color:var(--text);outline:none;resize:vertical;min-height:80px;transition:border-color .2s}
+.wishes-wrap textarea:focus{border-color:var(--oak)}
+.char-count{font-size:.72rem;color:var(--text-muted);text-align:right;margin-top:.25rem}
 
-    .input-wrap { position: relative; }
-    input[type="number"], select {
-      width: 100%;
-      padding: .65rem .9rem;
-      border: 1.5px solid var(--border);
-      border-radius: 9px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .95rem;
-      background: var(--cream);
-      color: var(--text);
-      outline: none;
-      transition: border-color .2s;
-      appearance: none;
-      -webkit-appearance: none;
-    }
-    input[type="number"]:focus, select:focus { border-color: var(--oak); }
-    input.has-error { border-color: var(--error) !important; }
-    .input-unit {
-      position: absolute;
-      right: .8rem; top: 50%;
-      transform: translateY(-50%);
-      font-size: .78rem;
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-    .field-msg {
-      font-size: .78rem;
-      min-height: 1.1em;
-      line-height: 1.3;
-    }
-    .field-msg.err { color: var(--error); }
-    .field-msg.warn {
-      color: var(--warn);
-      background: var(--warn-bg);
-      padding: .35rem .6rem;
-      border-radius: 6px;
-      border-left: 3px solid var(--warn);
-    }
+/* ── Generate button ── */
+.generate-wrap{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);padding:1.75rem;text-align:center}
+.generate-wrap h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:.4rem}
+.generate-wrap p{font-size:.85rem;color:var(--text-muted);margin-bottom:1.25rem}
+.btn-generate{padding:.9rem 2rem;background:var(--oak);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em;display:inline-flex;align-items:center;gap:.6rem}
+.btn-generate:hover:not(:disabled){background:var(--oak-dark);transform:translateY(-1px);box-shadow:0 4px 16px rgba(196,147,90,.4)}
+.btn-generate:disabled{background:var(--disabled);cursor:not-allowed;transform:none;box-shadow:none}
 
-    /* height toggle */
-    .btn-group { display: flex; gap: .5rem; }
-    .btn-pill {
-      flex: 1;
-      padding: .65rem .4rem;
-      border: 1.5px solid var(--border);
-      border-radius: 9px;
-      background: var(--cream);
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .85rem;
-      color: var(--text);
-      text-align: center;
-      transition: all .2s;
-    }
-    .btn-pill:hover { border-color: var(--oak-light); }
-    .btn-pill.selected { border-color: var(--oak); background: var(--white); color: var(--oak); font-weight: 600; }
+/* ── Sidebar ── */
+.sidebar-panel{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.sidebar-top{background:var(--text);padding:1.25rem 1.4rem;color:#fff}
+.sidebar-top h2{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:.15rem}
+.sidebar-top p{font-size:.78rem;opacity:.65}
+.sidebar-body{padding:1.25rem 1.3rem}
+.q-section{margin-bottom:.9rem}
+.q-label{font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);padding-bottom:.4rem;border-bottom:1px solid var(--cream-dark);margin-bottom:.4rem}
+.q-row{display:flex;justify-content:space-between;align-items:baseline;padding:.28rem 0;font-size:.85rem}
+.q-name{color:var(--text-muted);flex:1;margin-right:.5rem}
+.q-val{font-weight:500;white-space:nowrap}
+.q-divider{height:1px;background:var(--cream-dark);margin:.9rem 0}
+.q-total-row{display:flex;justify-content:space-between;padding:.3rem 0;font-size:.88rem}
+.q-total-row.big{font-size:1.1rem;font-weight:700;padding-top:.5rem}
+.q-total-row.muted{color:var(--text-muted);font-size:.82rem}
+.delivery-tag{background:var(--cream);border-radius:9px;padding:.7rem .9rem;display:flex;align-items:center;gap:.6rem;font-size:.84rem;margin-bottom:1rem;border:1px solid var(--cream-dark)}
+.warn-box{background:var(--error-bg);border:1px solid #d9a0a0;border-radius:9px;padding:.75rem;font-size:.8rem;color:var(--error);margin-bottom:1rem;display:none}
+.warn-box.show{display:block}
+.empty-hint{font-size:.82rem;color:var(--text-muted);font-style:italic;padding:.2rem 0}
+.btn-cta{width:100%;padding:1rem;background:var(--oak);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;letter-spacing:.02em;transition:background .2s,transform .15s,box-shadow .15s}
+.btn-cta:hover:not(:disabled){background:var(--oak-dark);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,147,90,.35)}
+.btn-cta:disabled{background:var(--disabled);cursor:not-allowed}
 
-    /* setup grid */
-    .setup-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: .75rem;
-    }
-    .setup-card {
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      padding: .8rem 1rem;
-      cursor: pointer;
-      background: var(--cream);
-      text-align: left;
-      font-family: 'DM Sans', sans-serif;
-      transition: all .2s;
-    }
-    .setup-card:hover { border-color: var(--oak-light); background: var(--white); }
-    .setup-card.selected { border-color: var(--oak); background: var(--white); }
-    .setup-name { font-size: .9rem; font-weight: 600; display: block; }
-    .setup-desc { font-size: .75rem; color: var(--text-muted); }
-    .setup-extra { font-size: .75rem; color: var(--oak); font-weight: 600; }
+/* ── Visualization section ── */
+.viz-section{max-width:1360px;margin:0 auto;padding:0 1.75rem 3rem}
+.viz-loading{display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:3rem;background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:1.5rem}
+.viz-loading.show{display:flex}
+.loading-text{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--text-muted)}
+.loading-dots::after{content:'';animation:dots 1.5s infinite}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+.pencil-svg{animation:pencil-rock .9s ease-in-out infinite alternate}
+@keyframes pencil-rock{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
 
-    /* ── Toggles (options / appliances) ─────── */
-    .toggle-list { display: flex; flex-direction: column; gap: .7rem; }
-    .toggle-item {
-      display: flex;
-      align-items: flex-start;
-      gap: .75rem;
-      padding: .9rem 1rem;
-      border: 1.5px solid var(--border);
-      border-radius: 11px;
-      background: var(--cream);
-      cursor: pointer;
-      transition: all .2s;
-      position: relative;
-      user-select: none;
-    }
-    .toggle-item:hover:not(.is-disabled) { border-color: var(--oak-light); background: var(--white); }
-    .toggle-item.is-selected { border-color: var(--oak); background: var(--white); }
-    .toggle-item.is-hidden { display: none; }
-    .toggle-item.is-disabled {
-      opacity: .5;
-      cursor: not-allowed;
-      background: var(--cream-dark);
-    }
+.viz-error{display:none;background:var(--error-bg);border:1px solid #d9a0a0;border-radius:14px;padding:1.5rem;color:var(--error);margin-bottom:1.5rem;font-size:.9rem}
+.viz-error.show{display:block}
 
-    .sw {
-      width: 42px; height: 24px;
-      background: var(--border);
-      border-radius: 12px;
-      position: relative;
-      flex-shrink: 0;
-      margin-top: 2px;
-      transition: background .2s;
-    }
-    .sw::after {
-      content: '';
-      position: absolute;
-      width: 18px; height: 18px;
-      background: #fff;
-      border-radius: 50%;
-      top: 3px; left: 3px;
-      transition: left .2s;
-      box-shadow: 0 1px 4px rgba(0,0,0,.18);
-    }
-    .toggle-item.is-selected .sw { background: var(--oak); }
-    .toggle-item.is-selected .sw::after { left: 21px; }
+.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.viz-card{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.viz-card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--cream-dark);font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:.5rem}
+.viz-card-body{padding:1rem;display:flex;justify-content:center}
+.viz-card-body svg{max-width:100%;height:auto}
 
-    .toggle-content { flex: 1; min-width: 0; }
-    .toggle-name {
-      font-size: .9rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-      flex-wrap: wrap;
-    }
-    .toggle-desc { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; }
-    .toggle-reason { font-size: .74rem; color: var(--text-muted); font-style: italic; margin-top: .15rem; }
-    .toggle-price { font-size: .85rem; font-weight: 600; color: var(--oak); white-space: nowrap; margin-top: 2px; }
+.design-card{background:var(--white);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;margin-bottom:1.5rem}
+.design-card-head{background:linear-gradient(135deg,var(--text) 0%,#4A3525 100%);padding:1.75rem 2rem;color:#fff}
+.design-card-head h2{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:.5rem}
+.design-card-head p{font-size:.9rem;opacity:.8;line-height:1.6}
+.design-card-body{padding:1.75rem 2rem}
+.design-highlights{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem}
+.design-highlights li{display:flex;align-items:flex-start;gap:.6rem;font-size:.9rem}
+.design-highlights li::before{content:'◆';color:var(--oak);font-size:.65rem;margin-top:.3rem;flex-shrink:0}
+.style-advice-box{background:var(--oak-muted);border:1px solid var(--oak-light);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-size:.875rem;color:var(--text);line-height:1.6}
+.style-advice-box strong{color:var(--oak-dark);display:block;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;margin-bottom:.25rem}
+.prompt-box-wrap{background:var(--cream);border-radius:10px;padding:1rem;border:1px solid var(--border)}
+.prompt-box-label{font-size:.72rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between}
+.btn-copy{padding:.2rem .6rem;background:var(--oak);color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:.72rem;cursor:pointer;transition:background .2s}
+.btn-copy:hover{background:var(--oak-dark)}
+.prompt-textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--text-muted);background:var(--white);resize:none;height:80px;line-height:1.5}
 
-    .badge {
-      font-size: .68rem;
-      padding: .12rem .45rem;
-      border-radius: 20px;
-      font-weight: 500;
-      line-height: 1.5;
-    }
-    .badge-rec {
-      background: rgba(196,147,90,.14);
-      color: var(--oak-dark);
-      border: 1px solid var(--oak-light);
-    }
-
-    /* ── Sidebar ─────────────────────────────── */
-    .sidebar-panel {
-      background: var(--white);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .sidebar-top {
-      background: var(--text);
-      padding: 1.25rem 1.4rem;
-      color: #fff;
-    }
-    .sidebar-top h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.15rem;
-      margin-bottom: .15rem;
-    }
-    .sidebar-top p { font-size: .78rem; opacity: .65; }
-
-    .sidebar-body { padding: 1.25rem 1.3rem; }
-
-    .q-section { margin-bottom: .9rem; }
-    .q-label {
-      font-size: .68rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      padding-bottom: .4rem;
-      border-bottom: 1px solid var(--cream-dark);
-      margin-bottom: .4rem;
-    }
-    .q-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      padding: .28rem 0;
-      font-size: .85rem;
-    }
-    .q-name { color: var(--text-muted); flex: 1; margin-right: .5rem; }
-    .q-val { font-weight: 500; white-space: nowrap; }
-
-    .q-divider { height: 1px; background: var(--cream-dark); margin: .9rem 0; }
-
-    .q-total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: .3rem 0;
-      font-size: .88rem;
-    }
-    .q-total-row.big {
-      font-size: 1.1rem;
-      font-weight: 700;
-      padding-top: .5rem;
-    }
-    .q-total-row.muted { color: var(--text-muted); font-size: .82rem; }
-
-    .delivery-tag {
-      background: var(--cream);
-      border-radius: 9px;
-      padding: .7rem .9rem;
-      display: flex;
-      align-items: center;
-      gap: .6rem;
-      font-size: .84rem;
-      margin-bottom: 1rem;
-      border: 1px solid var(--cream-dark);
-    }
-    .delivery-tag .icon { font-size: 1.1rem; }
-
-    .warn-box {
-      background: var(--error-bg);
-      border: 1px solid #d9a0a0;
-      border-radius: 9px;
-      padding: .75rem;
-      font-size: .8rem;
-      color: var(--error);
-      margin-bottom: 1rem;
-      display: none;
-    }
-    .warn-box.show { display: block; }
-
-    .empty-hint {
-      font-size: .82rem;
-      color: var(--text-muted);
-      font-style: italic;
-      padding: .2rem 0;
-    }
-
-    .btn-cta {
-      width: 100%;
-      padding: 1rem;
-      background: var(--oak);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: .02em;
-      transition: background .2s, transform .15s, box-shadow .15s;
-    }
-    .btn-cta:hover:not(:disabled) {
-      background: var(--oak-dark);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(196,147,90,.35);
-    }
-    .btn-cta:disabled { background: var(--disabled); cursor: not-allowed; }
-
-    /* ── Responsive ──────────────────────────── */
-    @media (max-width: 920px) {
-      .app { flex-direction: column; padding: 1rem; }
-      .sidebar { width: 100%; position: static; }
-    }
-    @media (max-width: 500px) {
-      .style-grid { grid-template-columns: 1fr; }
-      .dim-grid { grid-template-columns: 1fr; }
-      .setup-grid { grid-template-columns: 1fr; }
-      .site-header { padding: 1rem; }
-    }
-  </style>
+/* ── Responsive ── */
+@media(max-width:960px){
+  .app{flex-direction:column;padding:1rem}
+  .sidebar{width:100%;position:static}
+  .viz-grid{grid-template-columns:1fr}
+  .viz-section{padding:0 1rem 2rem}
+}
+@media(max-width:500px){
+  .style-grid{grid-template-columns:1fr}
+  .dim-grid{grid-template-columns:1fr}
+  .setup-grid{grid-template-columns:1fr}
+  .api-bar{padding:.6rem 1rem;flex-wrap:wrap}
+  .site-header{padding:1rem}
+}
+</style>
 </head>
 <body>
 
+<!-- API Key Bar -->
+<div class="api-bar">
+  <label for="api-key-inp">&#128273; Anthropic API-sleutel:</label>
+  <input type="password" id="api-key-inp" placeholder="sk-ant-api03-...">
+  <span class="api-key-hint">Wordt alleen lokaal gebruikt &mdash; nooit verstuurd naar een server</span>
+</div>
+
+<!-- Header -->
 <header class="site-header">
   <div class="logo-mark">&#9633;</div>
   <div>
-    <h1>Keuken Offerte Calculator</h1>
-    <p>Stel uw droomkeuken samen en ontvang direct een indicatieve offerte</p>
+    <h1>Keuken Offerte &amp; Ontwerp Calculator</h1>
+    <p>Stel uw droomkeuken samen en genereer een AI-visualisatie van uw ontwerp</p>
   </div>
 </header>
 
+<!-- Main App -->
 <div class="app">
-  <!-- ══ Main steps ══════════════════════════════ -->
   <main class="main">
 
     <!-- Step 1 -->
     <section class="step">
-      <div class="step-head">
-        <div class="step-num">1</div>
-        <h2 class="step-title">Kies uw keukenstijl</h2>
-      </div>
-      <div class="step-body">
-        <div class="style-grid" id="style-grid"></div>
-      </div>
+      <div class="step-head"><div class="step-num">1</div><h2 class="step-title">Kies uw keukenstijl</h2></div>
+      <div class="step-body"><div class="style-grid" id="style-grid"></div></div>
     </section>
 
     <!-- Step 2 -->
     <section class="step">
-      <div class="step-head">
-        <div class="step-num">2</div>
-        <h2 class="step-title">Afmetingen &amp; opstelling</h2>
-      </div>
+      <div class="step-head"><div class="step-num">2</div><h2 class="step-title">Afmetingen &amp; opstelling</h2></div>
       <div class="step-body">
         <div class="dim-grid">
-          <!-- Breedte -->
           <div class="form-group">
             <label for="inp-width">Breedte (cm)</label>
             <div class="input-wrap">
@@ -480,8 +244,6 @@
             </div>
             <span class="field-msg" id="msg-width"></span>
           </div>
-
-          <!-- Diepte -->
           <div class="form-group">
             <label for="inp-depth">Diepte (cm)</label>
             <div class="input-wrap">
@@ -490,14 +252,10 @@
             </div>
             <span class="field-msg" id="msg-depth"></span>
           </div>
-
-          <!-- Hoogte -->
           <div class="form-group">
             <label>Hoogte</label>
             <div class="btn-group" id="height-group"></div>
           </div>
-
-          <!-- Opstelling -->
           <div class="form-group">
             <label>Opstelling</label>
             <div class="setup-grid" id="setup-grid"></div>
@@ -508,528 +266,776 @@
 
     <!-- Step 3 -->
     <section class="step">
-      <div class="step-head">
-        <div class="step-num">3</div>
-        <h2 class="step-title">Opties &amp; materialen</h2>
-      </div>
-      <div class="step-body">
-        <div class="toggle-list" id="options-list"></div>
-      </div>
+      <div class="step-head"><div class="step-num">3</div><h2 class="step-title">Opties &amp; materialen</h2></div>
+      <div class="step-body"><div class="toggle-list" id="options-list"></div></div>
     </section>
 
     <!-- Step 4 -->
     <section class="step">
-      <div class="step-head">
-        <div class="step-num">4</div>
-        <h2 class="step-title">Inbouwapparatuur</h2>
-      </div>
+      <div class="step-head"><div class="step-num">4</div><h2 class="step-title">Inbouwapparatuur</h2></div>
+      <div class="step-body"><div class="toggle-list" id="appliances-list"></div></div>
+    </section>
+
+    <!-- Step 5 -->
+    <section class="step">
+      <div class="step-head"><div class="step-num">5</div><h2 class="step-title">Kleur, afwerking &amp; sfeer</h2></div>
       <div class="step-body">
-        <div class="toggle-list" id="appliances-list"></div>
+        <label style="display:block;margin-bottom:.6rem">Kleurpalet</label>
+        <div class="color-grid" id="color-grid"></div>
+        <label style="display:block;margin-bottom:.6rem;margin-top:1rem">Afwerking</label>
+        <div class="finish-row" id="finish-row"></div>
+        <div class="wishes-wrap">
+          <label for="inp-wishes" style="display:block;margin-bottom:.5rem">Extra wensen <span style="font-weight:400;color:var(--text-muted)">(optioneel)</span></label>
+          <textarea id="inp-wishes" maxlength="200" placeholder="Bijv. grote ramen, veel licht, marmer achterwand…"></textarea>
+          <div class="char-count"><span id="char-count">0</span>/200</div>
+        </div>
       </div>
     </section>
 
+    <!-- Generate -->
+    <div class="generate-wrap">
+      <h3>&#10024; Genereer uw keukenontwerp</h3>
+      <p>Op basis van uw keuzes maakt AI een gepersonaliseerde visualisatie en designadvies</p>
+      <button class="btn-generate" id="btn-generate" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Genereer mijn keukenontwerp
+      </button>
+    </div>
+
   </main>
 
-  <!-- ══ Sidebar ════════════════════════════════ -->
+  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-panel">
       <div class="sidebar-top">
         <h2>Uw offerte indicatie</h2>
-        <p>Alle bedragen zijn exclusief BTW, tenzij vermeld</p>
+        <p>Alle bedragen exclusief BTW, tenzij vermeld</p>
       </div>
-      <div class="sidebar-body" id="sidebar-body">
-        <!-- filled by JS -->
-      </div>
+      <div class="sidebar-body" id="sidebar-body"></div>
     </div>
   </aside>
+</div>
 
+<!-- Visualization Section -->
+<div class="viz-section" id="viz-section">
+  <!-- Loading -->
+  <div class="viz-loading" id="viz-loading">
+    <svg class="pencil-svg" width="72" height="72" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="18,82 78,22 88,32 28,92" fill="#C4935A"/>
+      <polygon points="18,82 28,92 14,96 18,82" fill="#E8B87A"/>
+      <polygon points="78,22 88,32 92,18" fill="#D0D0D0"/>
+      <rect x="74" y="18" width="18" height="8" rx="2" transform="rotate(45,83,22)" fill="#E0E0E0"/>
+      <path d="M22,88 Q50,65 78,28" stroke="#C4935A" stroke-width="2.5" fill="none" stroke-dasharray="90" stroke-dashoffset="90" stroke-linecap="round">
+        <animate attributeName="stroke-dashoffset" from="90" to="0" dur="1.4s" repeatCount="indefinite"/>
+      </path>
+    </svg>
+    <div>
+      <div class="loading-text">Uw keukenontwerp wordt samengesteld<span class="loading-dots"></span></div>
+      <div style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-top:.3rem">Claude AI analyseert uw specificaties</div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="viz-error" id="viz-error"></div>
+
+  <!-- SVG pair -->
+  <div class="viz-grid" id="viz-grid" style="display:none">
+    <div class="viz-card">
+      <div class="viz-card-head">&#9632; Plattegrond — bovenaanzicht</div>
+      <div class="viz-card-body" id="floorplan-wrap"></div>
+    </div>
+    <div class="viz-card">
+      <div class="viz-card-head">&#9642; Vooraanzicht perspectief</div>
+      <div class="viz-card-body" id="perspective-wrap"></div>
+    </div>
+  </div>
+
+  <!-- Design card -->
+  <div class="design-card" id="design-card" style="display:none">
+    <div class="design-card-head">
+      <h2 id="dc-title">–</h2>
+      <p id="dc-desc">–</p>
+    </div>
+    <div class="design-card-body">
+      <ul class="design-highlights" id="dc-highlights"></ul>
+      <div class="style-advice-box">
+        <strong>Stijladvies van uw ontwerper</strong>
+        <span id="dc-advice">–</span>
+      </div>
+      <div class="prompt-box-wrap">
+        <div class="prompt-box-label">
+          <span>&#128247; Gebruik in Midjourney of DALL·E</span>
+          <button class="btn-copy" id="btn-copy-prompt">Kopieer</button>
+        </div>
+        <textarea class="prompt-textarea" id="dc-prompt" readonly></textarea>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 'use strict';
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════
    DATA
-══════════════════════════════════════════════ */
+════════════════════════════════════ */
 const STYLES = [
-  { id:'modern',     name:'Modern',     icon:'◻',  desc:'Strak, minimalistisch en tijdloos',  price:2800, delivery:[8,10]  },
-  { id:'landelijk',  name:'Landelijk',  icon:'⌂',  desc:'Warm, gezellig en authentiek',       price:2400, delivery:[6,8]   },
-  { id:'klassiek',   name:'Klassiek',   icon:'✦',  desc:'Elegant, verfijnd en duurzaam',      price:3200, delivery:[10,12] },
-  { id:'industrieel',name:'Industrieel',icon:'⚙',  desc:'Ruw, stoer en karaktervol',          price:2600, delivery:[8,10]  },
+  {id:'modern',    name:'Modern',     icon:'◻', desc:'Strak, minimalistisch en tijdloos',  price:2800, delivery:[8,10]},
+  {id:'landelijk', name:'Landelijk',  icon:'⌂', desc:'Warm, gezellig en authentiek',       price:2400, delivery:[6,8]},
+  {id:'klassiek',  name:'Klassiek',   icon:'✦', desc:'Elegant, verfijnd en duurzaam',      price:3200, delivery:[10,12]},
+  {id:'industrieel',name:'Industrieel',icon:'⚙',desc:'Ruw, stoer en karaktervol',          price:2600, delivery:[8,10]},
 ];
-
 const HEIGHTS = [195, 215, 235];
-
 const SETUPS = [
-  { id:'recht',   name:'Recht',   desc:'Eén rechte wand',      surcharge:0    },
-  { id:'hoek',    name:'Hoek',    desc:'L-vormige opstelling',  surcharge:0    },
-  { id:'eiland',  name:'Eiland',  desc:'Met vrijstaand eiland', surcharge:2800 },
-  { id:'u-vorm',  name:'U-vorm',  desc:'Drie wanden',           surcharge:1900 },
+  {id:'recht',  name:'Recht',   desc:'Eén rechte wand',      surcharge:0},
+  {id:'hoek',   name:'Hoek',    desc:'L-vormige opstelling',  surcharge:0},
+  {id:'eiland', name:'Eiland',  desc:'Met vrijstaand eiland', surcharge:2800},
+  {id:'u-vorm', name:'U-vorm',  desc:'Drie wanden',           surcharge:1900},
 ];
-
 const OPTIONS = [
-  { id:'softclose', name:'Soft-close scharnieren',    desc:'Zachte, geluidloze sluitwerking',         price:480,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
-  { id:'quartz',    name:'Quartz werkblad',            desc:'Onderhoudsvriendelijk en duurzaam',       price:1200, incompatible:['graniet','hout'],  cornerOnly:false, recommended:['modern','industrieel']},
-  { id:'graniet',   name:'Graniet werkblad',           desc:'Natuursteen met uniek patroon',           price:1800, incompatible:['quartz','hout'],   cornerOnly:false, recommended:['klassiek']           },
-  { id:'hout',      name:'Massief houten werkblad',    desc:'Warm en natuurlijk karakter',             price:950,  incompatible:['quartz','graniet'],cornerOnly:false, recommended:['landelijk']          },
-  { id:'led',       name:'LED onderbouwverlichting',   desc:'Sfeervolle werkverlichting onder kasten', price:320,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
-  { id:'ladeorg',   name:'Ladeorganisatie systeem',    desc:'Slimme en stijlvolle opbergoplossing',    price:560,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
-  { id:'pushopen',  name:'Push-to-open deuren',        desc:'Greeploos, strak design',                 price:740,  incompatible:['grepen'],         cornerOnly:false, recommended:['modern','industrieel']},
-  { id:'grepen',    name:'Design grepen RVS',          desc:'Hoogwaardig roestvrij stalen grepen',     price:380,  incompatible:['pushopen'],       cornerOnly:false, recommended:['klassiek','landelijk']},
-  { id:'carrousel', name:'Carrousel hoekoplossing',    desc:'Optimaal gebruik van hoekruimte',         price:680,  incompatible:[],                 cornerOnly:true,  recommended:[]                    },
+  {id:'softclose',name:'Soft-close scharnieren',  desc:'Zachte, geluidloze sluitwerking',          price:480,  incompatible:[],                 cornerOnly:false, recommended:[]},
+  {id:'quartz',   name:'Quartz werkblad',          desc:'Onderhoudsvriendelijk en duurzaam',        price:1200, incompatible:['graniet','hout'], cornerOnly:false, recommended:['modern','industrieel']},
+  {id:'graniet',  name:'Graniet werkblad',          desc:'Natuursteen met uniek patroon',            price:1800, incompatible:['quartz','hout'],  cornerOnly:false, recommended:['klassiek']},
+  {id:'hout',     name:'Massief houten werkblad',   desc:'Warm en natuurlijk karakter',              price:950,  incompatible:['quartz','graniet'],cornerOnly:false, recommended:['landelijk']},
+  {id:'led',      name:'LED onderbouwverlichting',  desc:'Sfeervolle werkverlichting onder kasten',  price:320,  incompatible:[],                 cornerOnly:false, recommended:[]},
+  {id:'ladeorg',  name:'Ladeorganisatie systeem',   desc:'Slimme en stijlvolle opbergoplossing',     price:560,  incompatible:[],                 cornerOnly:false, recommended:[]},
+  {id:'pushopen', name:'Push-to-open deuren',       desc:'Greeploos, strak design',                  price:740,  incompatible:['grepen'],         cornerOnly:false, recommended:['modern','industrieel']},
+  {id:'grepen',   name:'Design grepen RVS',         desc:'Hoogwaardig roestvrij stalen grepen',      price:380,  incompatible:['pushopen'],       cornerOnly:false, recommended:['klassiek','landelijk']},
+  {id:'carrousel',name:'Carrousel hoekoplossing',   desc:'Optimaal gebruik van hoekruimte',          price:680,  incompatible:[],                 cornerOnly:true,  recommended:[]},
 ];
-
 const APPLIANCES = [
-  { id:'oven',      name:'Inbouwoven',          desc:'Multifunctionele inbouwoven',       price:890,  incompatible:['stoomoven'] },
-  { id:'inductie',  name:'Inductiekookplaat',   desc:'Energiezuinig en razendsnel',       price:680,  incompatible:[]            },
-  { id:'vaatwasser',name:'Vaatwasser',          desc:'Geïntegreerde inbouw vaatwasser',   price:740,  incompatible:[]            },
-  { id:'koelkast',  name:'Inbouwkoelkast',      desc:'Naadloos geïntegreerde koeling',    price:820,  incompatible:[]            },
-  { id:'afzuigkap', name:'Afzuigkap',           desc:'Effectieve en stijlvolle afzuiging',price:620,  incompatible:[]            },
-  { id:'stoomoven', name:'Combi-stoomoven',      desc:'Combi stoom- en convectie-oven',    price:1480, incompatible:['oven']      },
+  {id:'oven',      name:'Inbouwoven',         desc:'Multifunctionele inbouwoven',        price:890,  incompatible:['stoomoven']},
+  {id:'inductie',  name:'Inductiekookplaat',  desc:'Energiezuinig en razendsnel',        price:680,  incompatible:[]},
+  {id:'vaatwasser',name:'Vaatwasser',         desc:'Geïntegreerde inbouw vaatwasser',   price:740,  incompatible:[]},
+  {id:'koelkast',  name:'Inbouwkoelkast',     desc:'Naadloos geïntegreerde koeling',    price:820,  incompatible:[]},
+  {id:'afzuigkap', name:'Afzuigkap',          desc:'Effectieve en stijlvolle afzuiging',price:620,  incompatible:[]},
+  {id:'stoomoven', name:'Combi-stoomoven',    desc:'Combi stoom- en convectie-oven',    price:1480, incompatible:['oven']},
+];
+const COLORS = [
+  {id:'wit',        name:'Wit',          hex:'#F4F2ED', dark:false},
+  {id:'antraciet',  name:'Antraciet',    hex:'#3C3C3C', dark:true},
+  {id:'naturel',    name:'Naturel hout', hex:'#C4935A', dark:false},
+  {id:'donkerhout', name:'Donker hout',  hex:'#5C3D1E', dark:true},
+  {id:'saliegroen', name:'Saliegroen',   hex:'#7A9E7E', dark:false},
+  {id:'navy',       name:'Navy blauw',   hex:'#2C3E6B', dark:true},
+];
+const FINISHES = [
+  {id:'mat',       name:'Mat',       desc:'Vingerafdrukvrij & stijlvol'},
+  {id:'hoogglans', name:'Hoogglans', desc:'Helder en ruimtelijk effect'},
+  {id:'houtnerf',  name:'Houtnerf',  desc:'Warme, natuurlijke uitstraling'},
 ];
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════
    STATE
-══════════════════════════════════════════════ */
+════════════════════════════════════ */
 const state = {
-  style:      null,
-  width:      '',
-  depth:      '',
-  height:     215,
-  setup:      'recht',
-  options:    new Set(),
-  appliances: new Set(),
+  apiKey:'', style:null, width:'', depth:'',
+  height:215, setup:'recht',
+  options:new Set(), appliances:new Set(),
+  color:null, finish:null, wishes:'',
 };
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════
    HELPERS
-══════════════════════════════════════════════ */
-function eur(n) {
-  return '€\u202F' + n.toLocaleString('nl-NL', { minimumFractionDigits:0, maximumFractionDigits:0 });
-}
+════════════════════════════════════ */
+const eur = n => '€\u202F' + n.toLocaleString('nl-NL',{minimumFractionDigits:0,maximumFractionDigits:0});
+const getStyle  = () => STYLES.find(s => s.id === state.style) || null;
+const getSetup  = () => SETUPS.find(s => s.id === state.setup);
+const isCorner  = () => state.setup === 'hoek' || state.setup === 'u-vorm';
 
-function getStyle()  { return STYLES.find(s => s.id === state.style) || null; }
-function getSetup()  { return SETUPS.find(s => s.id === state.setup); }
-
-function isCornerSetup() {
-  return state.setup === 'hoek' || state.setup === 'u-vorm';
-}
-
-/* ── Incompatibility helpers ─────────────────── */
-function disabledOptionReason(opt) {
-  for (const iid of opt.incompatible) {
-    if (state.options.has(iid)) {
-      const blocker = OPTIONS.find(o => o.id === iid);
-      return blocker ? `Niet combineerbaar met "${blocker.name}"` : 'Niet combineerbaar';
+function disabledOptReason(opt) {
+  for (const id of opt.incompatible) {
+    if (state.options.has(id)) {
+      const b = OPTIONS.find(o => o.id === id);
+      return b ? `Niet combineerbaar met "${b.name}"` : 'Niet combineerbaar';
     }
   }
   return null;
 }
-
-function disabledApplianceReason(app) {
-  for (const iid of app.incompatible) {
-    if (state.appliances.has(iid)) {
-      const blocker = APPLIANCES.find(a => a.id === iid);
-      return blocker ? `Niet combineerbaar met "${blocker.name}"` : 'Niet combineerbaar';
+function disabledAppReason(app) {
+  for (const id of app.incompatible) {
+    if (state.appliances.has(id)) {
+      const b = APPLIANCES.find(a => a.id === id);
+      return b ? `Niet combineerbaar met "${b.name}"` : 'Niet combineerbaar';
     }
   }
   return null;
 }
-
-/* ── Calculate ───────────────────────────────── */
-function calculate() {
-  const style = getStyle();
-  const w     = parseFloat(state.width) || 0;
-  const setup = getSetup();
-
-  const basePrice      = style ? (w / 100) * style.price : 0;
-  const setupSurcharge = setup ? setup.surcharge : 0;
-
-  let optTotal = 0;
-  for (const id of state.options) {
-    const o = OPTIONS.find(x => x.id === id);
-    if (o) optTotal += o.price;
-  }
-
-  let appTotal = 0;
-  for (const id of state.appliances) {
-    const a = APPLIANCES.find(x => x.id === id);
-    if (a) appTotal += a.price;
-  }
-
-  const subtotal = basePrice + setupSurcharge + optTotal + appTotal;
-  const vat      = subtotal * 0.21;
-  const total    = subtotal + vat;
-
-  return { basePrice, setupSurcharge, optTotal, appTotal, subtotal, vat, total };
-}
-
-/* ── Delivery time ───────────────────────────── */
-function getDelivery() {
-  const style = getStyle();
-  if (!style) return null;
-  const extra = state.options.size;          // +1 week per custom optie (stap 3)
-  const [lo, hi] = style.delivery;
-  return `${lo + extra}–${hi + extra} weken`;
-}
-
-/* ── Width validation ────────────────────────── */
-function widthValid() {
+function widthStatus() {
   const v = parseFloat(state.width);
   if (!state.width) return 'empty';
-  if (v < 150)      return 'low';
-  if (v > 600)      return 'high';
+  if (v < 150) return 'low';
+  if (v > 600) return 'high';
   return 'ok';
 }
+const dimsOk = () => widthStatus() === 'ok';
 
-function dimensionsOk() {
-  return widthValid() === 'ok';
+function calculate() {
+  const style = getStyle(), w = parseFloat(state.width)||0, setup = getSetup();
+  const base  = style ? (w/100)*style.price : 0;
+  const setupExtra = setup ? setup.surcharge : 0;
+  let optTotal = 0;
+  for (const id of state.options) { const o = OPTIONS.find(x=>x.id===id); if(o) optTotal+=o.price; }
+  let appTotal = 0;
+  for (const id of state.appliances) { const a = APPLIANCES.find(x=>x.id===id); if(a) appTotal+=a.price; }
+  const sub = base+setupExtra+optTotal+appTotal, vat = sub*0.21;
+  return {base,setupExtra,optTotal,appTotal,sub,vat,total:sub+vat};
+}
+function getDelivery() {
+  const s = getStyle(); if(!s) return null;
+  const extra = state.options.size;
+  return `${s.delivery[0]+extra}–${s.delivery[1]+extra} weken`;
 }
 
-/* ══════════════════════════════════════════════
-   RENDER – Step 1: Styles
-══════════════════════════════════════════════ */
-function renderStyles() {
-  const grid = document.getElementById('style-grid');
-  grid.innerHTML = STYLES.map(s => `
-    <div class="style-card${state.style === s.id ? ' selected' : ''}"
-         data-style="${s.id}" role="button" tabindex="0"
-         aria-pressed="${state.style === s.id}">
+/* ════════════════════════════════════
+   SVG COLORS
+════════════════════════════════════ */
+function getStyleColors() {
+  const map = {
+    'wit':        {cab:'#F0EEE8',cabinetStroke:'#C8C4BA',wt:'#D4CCC0',wall:'#E8E4DC'},
+    'antraciet':  {cab:'#454545',cabinetStroke:'#282828',wt:'#7A7A7A',wall:'#F0EBE0'},
+    'naturel':    {cab:'#C4935A',cabinetStroke:'#8B6342',wt:'#E0B080',wall:'#F0EBE0'},
+    'donkerhout': {cab:'#5C3D1E',cabinetStroke:'#3A2510',wt:'#7A5030',wall:'#F0EBE0'},
+    'saliegroen': {cab:'#7A9E7E',cabinetStroke:'#4A6E4E',wt:'#C8BF98',wall:'#F0EBE0'},
+    'navy':       {cab:'#2C3E6B',cabinetStroke:'#1A2540',wt:'#C0B8A8',wall:'#F0EBE0'},
+  };
+  const styleDef = {modern:'antraciet',landelijk:'naturel',klassiek:'saliegroen',industrieel:'antraciet'};
+  const key = state.color || (state.style ? styleDef[state.style] : 'wit');
+  return map[key] || map['wit'];
+}
+
+/* ════════════════════════════════════
+   SVG FLOOR PLAN
+════════════════════════════════════ */
+function buildFloorPlan() {
+  const w = parseFloat(state.width)||300;
+  const d = parseFloat(state.depth)||60;
+  const setup = state.setup;
+  const C = getStyleColors();
+  const SW=480, SH=340, M=52;
+  const AW=SW-M*2, AH=SH-M*2;
+  const retLen = Math.round(w*0.38);
+
+  let boxW,boxH;
+  if(setup==='recht'){boxW=w;boxH=d+w*0.38;}
+  else if(setup==='hoek'){boxW=w;boxH=retLen+d*1.2;}
+  else if(setup==='eiland'){boxW=w;boxH=d*4;}
+  else{boxW=w;boxH=retLen+d*1.3;}
+
+  const sc  = Math.min(AW/boxW,AH/boxH);
+  const ox  = M+(AW-boxW*sc)/2;
+  const oy  = M+(AH-boxH*sc)/2;
+  const px  = cm => cm*sc;
+
+  const cabRect=(x,y,cw,ch)=>{
+    x=+x.toFixed(1);y=+y.toFixed(1);cw=+cw.toFixed(1);ch=+ch.toFixed(1);
+    return `<rect x="${x}" y="${y}" width="${cw}" height="${ch}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.5" rx="2"/>
+    <rect x="${x+2}" y="${y+2}" width="${cw-4}" height="${ch-4}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".6" opacity=".45" rx="1"/>`;
+  };
+  const wtRect=(x,y,cw,ch)=>`<rect x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" width="${(+cw).toFixed(1)}" height="${(+ch).toFixed(1)}" fill="${C.wt}" rx="1" opacity=".9"/>`;
+  const wallRect=(x,y,cw,ch)=>`<rect x="${(x-2).toFixed(1)}" y="${(y-2).toFixed(1)}" width="${(cw+4).toFixed(1)}" height="${(ch+4).toFixed(1)}" fill="#3A2E22" rx="1"/>`;
+  const dim=(x1,y1,x2,y2,lbl,rot=0)=>{
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#9A8A7A" stroke-width=".8" stroke-dasharray="3,2"/>
+    <text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="9.5" fill="#7A6E5D" transform="rotate(${rot},${mx.toFixed(1)},${my.toFixed(1)})">${lbl}</text>`;
+  };
+
+  const cD=px(d), kW=px(w), rL=px(retLen), wts=Math.max(4,cD*.12);
+  let els='';
+
+  if(setup==='recht'){
+    els+=wallRect(ox,oy,kW,cD);
+    els+=cabRect(ox,oy,kW,cD*.87);
+    els+=wtRect(ox,oy+cD*.87,kW,wts);
+    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
+    els+=dim(ox-30,oy,ox-30,oy+cD,`${d} cm`,-90);
+  } else if(setup==='hoek'){
+    els+=wallRect(ox,oy,kW,cD);
+    els+=cabRect(ox,oy,kW,cD*.87);
+    els+=wtRect(ox,oy+cD*.87,kW,wts);
+    els+=wallRect(ox,oy,cD,rL);
+    els+=cabRect(ox,oy,cD*.87,rL);
+    els+=wtRect(ox+cD*.87,oy,wts,rL);
+    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
+    els+=dim(ox-30,oy,ox-30,oy+rL,`${retLen} cm`,-90);
+  } else if(setup==='eiland'){
+    const iW=px(Math.round(w*.45)), iD=px(80), iX=ox+(kW-iW)/2, iY=oy+cD+px(70);
+    els+=wallRect(ox,oy,kW,cD);
+    els+=cabRect(ox,oy,kW,cD*.87);
+    els+=wtRect(ox,oy+cD*.87,kW,wts);
+    els+=cabRect(iX,iY,iW,iD*.87);
+    els+=wtRect(iX,iY+iD*.87,iW,wts);
+    els+=`<text x="${(iX+iW/2).toFixed(1)}" y="${(iY+iD*.45).toFixed(1)}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" fill="${C.cabinetStroke}" opacity=".7">Eiland</text>`;
+    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
+    els+=dim(iX,iY+iD+12,iX+iW,iY+iD+12,`${Math.round(w*.45)} cm`);
+  } else { // u-vorm
+    els+=wallRect(ox,oy,kW,cD);
+    els+=cabRect(ox,oy,kW,cD*.87);
+    els+=wtRect(ox,oy+cD*.87,kW,wts);
+    els+=wallRect(ox,oy,cD,rL);
+    els+=cabRect(ox,oy,cD*.87,rL);
+    els+=wtRect(ox+cD*.87,oy,wts,rL);
+    const rx2=ox+kW-cD;
+    els+=wallRect(rx2,oy,cD,rL);
+    els+=cabRect(rx2+cD*.13,oy,cD*.87,rL);
+    els+=wtRect(rx2,oy,wts,rL);
+    els+=dim(ox,oy-18,ox+kW,oy-18,`${w} cm`);
+    els+=dim(ox-30,oy,ox-30,oy+rL,`${retLen} cm`,-90);
+  }
+
+  // Appliance icons in cabinet area
+  if(state.appliances.has('inductie')||state.appliances.has('oven')){
+    const ax=ox+kW*.5-px(25), ay=oy+cD*.25;
+    els+=`<rect x="${ax.toFixed(1)}" y="${ay.toFixed(1)}" width="${px(50).toFixed(1)}" height="${px(35).toFixed(1)}" fill="#222" rx="2" opacity=".55"/>`;
+    if(state.appliances.has('inductie')){
+      [[.25,.3],[.75,.3],[.25,.7],[.75,.7]].forEach(([rx,ry])=>{
+        els+=`<circle cx="${(ax+px(50)*rx).toFixed(1)}" cy="${(ay+px(35)*ry).toFixed(1)}" r="${Math.max(3,px(5.5)).toFixed(1)}" fill="none" stroke="#666" stroke-width="1.4"/>`;
+      });
+    } else {
+      els+=`<rect x="${(ax+px(8)).toFixed(1)}" y="${(ay+px(5)).toFixed(1)}" width="${px(34).toFixed(1)}" height="${px(25).toFixed(1)}" fill="none" stroke="#555" stroke-width="1" rx="1"/>`;
+    }
+  }
+
+  // Legend
+  els+=`<rect x="10" y="${SH-28}" width="11" height="9" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1" rx="1"/>
+  <text x="24" y="${SH-21}" font-family="DM Sans,sans-serif" font-size="9" fill="#7A6E5D">Kasten</text>
+  <rect x="68" y="${SH-28}" width="11" height="9" fill="${C.wt}" rx="1"/>
+  <text x="82" y="${SH-21}" font-family="DM Sans,sans-serif" font-size="9" fill="#7A6E5D">Werkblad</text>`;
+
+  return `<svg width="${SW}" height="${SH}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${SW}" height="${SH}" fill="#EDE8DC" rx="10"/>
+  <rect x="${M-8}" y="${M-8}" width="${AW+16}" height="${AH+16}" fill="#F5F0E6" rx="7"/>
+  <text x="${SW/2}" y="18" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">schaal ±1:${Math.max(1,Math.round(1/sc))} &nbsp;·&nbsp; bovenaanzicht</text>
+  ${els}
+  </svg>`;
+}
+
+/* ════════════════════════════════════
+   SVG PERSPECTIVE SKETCH
+════════════════════════════════════ */
+function buildPerspective() {
+  const w   = parseFloat(state.width)||300;
+  const h   = parseInt(state.height)||215;
+  const C   = getStyleColors();
+  const hasUpper = h >= 215;
+  const SW=520, SH=310, mX=40, mY=28;
+  const drawW=SW-mX*2;
+
+  // Real-world heights (cm)
+  const lowerH_cm=85, wtH_cm=3, gapH_cm=12;
+  const upperH_cm=hasUpper?h-lowerH_cm-wtH_cm-gapH_cm-8:0;
+
+  // px-per-cm: fit width
+  const sc=drawW/w;
+  const kitW=drawW;
+
+  // y positions (from bottom up)
+  const floorY=SH-mY;
+  const ceilingY=mY+10;
+  const totalPx=floorY-ceilingY;
+  const scH=totalPx/h; // px per cm (height)
+
+  const lowerTop  = floorY - lowerH_cm*scH;
+  const wtTop     = lowerTop - wtH_cm*scH;
+  const upperBot  = wtTop - gapH_cm*scH;
+  const upperTop  = upperBot - upperH_cm*scH;
+
+  const x0=mX;
+  const numDoors = Math.max(1,Math.round(w/60));
+  const dw = kitW/numDoors;
+
+  let els='';
+
+  // Wall background
+  els+=`<rect x="${x0}" y="${ceilingY}" width="${kitW}" height="${floorY-ceilingY}" fill="${C.wall}" rx="0"/>`;
+
+  // Lower cabinets
+  for(let i=0;i<numDoors;i++){
+    const dx=x0+i*dw;
+    els+=`<rect x="${dx.toFixed(1)}" y="${lowerTop.toFixed(1)}" width="${dw.toFixed(1)}" height="${(floorY-lowerTop).toFixed(1)}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.2"/>`;
+    els+=`<rect x="${(dx+3).toFixed(1)}" y="${(lowerTop+6).toFixed(1)}" width="${(dw-6).toFixed(1)}" height="${(floorY-lowerTop-10).toFixed(1)}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".7" rx="2" opacity=".6"/>`;
+    // Handle
+    if(state.options.has('grepen')){
+      const hy=lowerTop+(floorY-lowerTop)*0.5;
+      els+=`<line x1="${(dx+dw*.3).toFixed(1)}" y1="${hy.toFixed(1)}" x2="${(dx+dw*.7).toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#B0A898" stroke-width="2.5" stroke-linecap="round"/>`;
+    }
+  }
+
+  // Worktop
+  els+=`<rect x="${x0}" y="${wtTop.toFixed(1)}" width="${kitW}" height="${((lowerTop-wtTop)+3).toFixed(1)}" fill="${C.wt}"/>`;
+
+  // Overhang shadow
+  els+=`<rect x="${x0}" y="${lowerTop.toFixed(1)}" width="${kitW}" height="3" fill="rgba(0,0,0,.1)"/>`;
+
+  // Upper cabinets
+  if(hasUpper && upperH_cm>15){
+    for(let i=0;i<numDoors;i++){
+      const dx=x0+i*dw;
+      els+=`<rect x="${dx.toFixed(1)}" y="${upperTop.toFixed(1)}" width="${dw.toFixed(1)}" height="${(upperBot-upperTop).toFixed(1)}" fill="${C.cab}" stroke="${C.cabinetStroke}" stroke-width="1.2" opacity=".92"/>`;
+      els+=`<rect x="${(dx+3).toFixed(1)}" y="${(upperTop+5).toFixed(1)}" width="${(dw-6).toFixed(1)}" height="${(upperBot-upperTop-9).toFixed(1)}" fill="none" stroke="${C.cabinetStroke}" stroke-width=".7" rx="2" opacity=".5"/>`;
+      if(state.options.has('grepen')){
+        const hy=upperTop+(upperBot-upperTop)*0.72;
+        els+=`<line x1="${(dx+dw*.3).toFixed(1)}" y1="${hy.toFixed(1)}" x2="${(dx+dw*.7).toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#B0A898" stroke-width="2" stroke-linecap="round"/>`;
+      }
+    }
+  }
+
+  // Inductie kookplaat on worktop
+  if(state.appliances.has('inductie')){
+    const iw=Math.min(px2(75),kitW*.32), ih=Math.min(px2(45),iw*.6);
+    const ix=x0+kitW*.5-iw/2, iy=wtTop-ih-.5;
+    els+=`<rect x="${ix.toFixed(1)}" y="${iy.toFixed(1)}" width="${iw.toFixed(1)}" height="${ih.toFixed(1)}" fill="#111" rx="2"/>`;
+    [[.22,.3],[.78,.3],[.22,.72],[.78,.72]].forEach(([rx,ry])=>{
+      const r=Math.max(3,iw*.1);
+      els+=`<circle cx="${(ix+iw*rx).toFixed(1)}" cy="${(iy+ih*ry).toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#444" stroke-width="1.3"/>`;
+    });
+  }
+
+  // Afzuigkap
+  if(state.appliances.has('afzuigkap')){
+    const hw=Math.min(px2(80),kitW*.28);
+    const hx=x0+kitW*.5-hw/2;
+    const hy=hasUpper&&upperH_cm>15?upperTop-16:wtTop-Math.min(80,lowerTop-ceilingY)*.5;
+    els+=`<polygon points="${hx},${(hy+16).toFixed(1)} ${(hx+hw)},${(hy+16).toFixed(1)} ${(hx+hw*.78)},${hy.toFixed(1)} ${(hx+hw*.22)},${hy.toFixed(1)}" fill="#888" stroke="#666" stroke-width="1"/>`;
+    els+=`<rect x="${(hx+hw*.08).toFixed(1)}" y="${(hy+16).toFixed(1)}" width="${(hw*.84).toFixed(1)}" height="4" fill="#999"/>`;
+  }
+
+  // LED strip
+  if(state.options.has('led')&&hasUpper&&upperH_cm>15){
+    els+=`<rect x="${x0}" y="${(upperBot+1).toFixed(1)}" width="${kitW}" height="2.5" fill="#FFE97A" opacity=".7" rx="1"/>`;
+    els+=`<rect x="${x0}" y="${(upperBot+3).toFixed(1)}" width="${kitW}" height="${(lowerTop-upperBot-3).toFixed(1)}" fill="rgba(255,235,120,.06)" rx="0"/>`;
+  }
+
+  // Floor line
+  els+=`<line x1="${x0}" y1="${floorY}" x2="${x0+kitW}" y2="${floorY}" stroke="#8B7355" stroke-width="2"/>`;
+
+  // Dim label
+  els+=`<text x="${SW/2}" y="${SH-6}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">${w} cm breed · ${h} cm hoog</text>`;
+
+  function px2(cm){return cm*sc;}
+
+  return `<svg width="${SW}" height="${SH}" viewBox="0 0 ${SW} ${SH}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${SW}" height="${SH}" fill="#EDE8DC" rx="10"/>
+  <text x="${SW/2}" y="17" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="#9A8A7A">vooraanzicht — niet op schaal</text>
+  ${els}
+  </svg>`;
+}
+
+/* ════════════════════════════════════
+   RENDER – Step 1
+════════════════════════════════════ */
+function renderStyles(){
+  const el=document.getElementById('style-grid');
+  el.innerHTML=STYLES.map(s=>`
+    <div class="style-card${state.style===s.id?' selected':''}" data-style="${s.id}" role="button" tabindex="0">
       <div class="style-card-icon">${s.icon}</div>
       <div class="style-card-name">${s.name}</div>
       <div class="style-card-desc">${s.desc}</div>
       <div class="style-card-price">${eur(s.price)} / strekkende meter</div>
       <div class="check-mark">✓</div>
-    </div>
-  `).join('');
-
-  grid.querySelectorAll('.style-card').forEach(card => {
-    const pick = () => {
-      state.style = card.dataset.style;
-      update();
-    };
-    card.addEventListener('click', pick);
-    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    </div>`).join('');
+  el.querySelectorAll('.style-card').forEach(c=>{
+    const pick=()=>{state.style=c.dataset.style;update();};
+    c.addEventListener('click',pick);
+    c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();}});
   });
 }
 
-/* ══════════════════════════════════════════════
-   RENDER – Step 2: Dimensions
-══════════════════════════════════════════════ */
-function renderHeights() {
-  const grp = document.getElementById('height-group');
-  grp.innerHTML = HEIGHTS.map(h => `
-    <button class="btn-pill${state.height === h ? ' selected' : ''}" data-height="${h}">${h} cm</button>
-  `).join('');
-  grp.querySelectorAll('.btn-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.height = parseInt(btn.dataset.height);
-      update();
-    });
-  });
+/* ════════════════════════════════════
+   RENDER – Step 2
+════════════════════════════════════ */
+function renderHeights(){
+  const el=document.getElementById('height-group');
+  el.innerHTML=HEIGHTS.map(h=>`<button class="btn-pill${state.height===h?' selected':''}" data-h="${h}">${h} cm</button>`).join('');
+  el.querySelectorAll('.btn-pill').forEach(b=>b.addEventListener('click',()=>{state.height=parseInt(b.dataset.h);update();}));
 }
-
-function renderSetup() {
-  const grid = document.getElementById('setup-grid');
-  grid.innerHTML = SETUPS.map(s => `
-    <button class="setup-card${state.setup === s.id ? ' selected' : ''}" data-setup="${s.id}">
+function renderSetup(){
+  const el=document.getElementById('setup-grid');
+  el.innerHTML=SETUPS.map(s=>`
+    <button class="setup-card${state.setup===s.id?' selected':''}" data-setup="${s.id}">
       <span class="setup-name">${s.name}</span>
       <span class="setup-desc">${s.desc}</span>
-      ${s.surcharge ? `<span class="setup-extra">+ ${eur(s.surcharge)}</span>` : ''}
-    </button>
-  `).join('');
-  grid.querySelectorAll('.setup-card').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.setup = btn.dataset.setup;
-      // If carrousel was selected but setup no longer allows it, remove it
-      if (!isCornerSetup() && state.options.has('carrousel')) {
-        state.options.delete('carrousel');
-      }
-      update();
-    });
-  });
+      ${s.surcharge?`<span class="setup-extra">+ ${eur(s.surcharge)}</span>`:''}
+    </button>`).join('');
+  el.querySelectorAll('.setup-card').forEach(b=>b.addEventListener('click',()=>{
+    state.setup=b.dataset.setup;
+    if(!isCorner()&&state.options.has('carrousel')) state.options.delete('carrousel');
+    update();
+  }));
 }
 
-/* ══════════════════════════════════════════════
-   RENDER – Step 3: Options
-══════════════════════════════════════════════ */
-function renderOptions() {
-  const list = document.getElementById('options-list');
-  const currentStyle = state.style;
-
-  list.innerHTML = OPTIONS.map(opt => {
-    const hidden   = opt.cornerOnly && !isCornerSetup();
-    const reason   = disabledOptionReason(opt);
-    const disabled = !!reason;
-    const selected = state.options.has(opt.id);
-
-    const isRec    = currentStyle && opt.recommended.includes(currentStyle);
-    const styleName = currentStyle ? STYLES.find(s => s.id === currentStyle)?.name : '';
-
-    let cls = 'toggle-item';
-    if (hidden)    cls += ' is-hidden';
-    if (disabled)  cls += ' is-disabled';
-    if (selected)  cls += ' is-selected';
-
-    return `
-      <div class="${cls}" data-opt="${opt.id}"
-           role="checkbox" aria-checked="${selected}" tabindex="${disabled ? -1 : 0}"
-           ${disabled ? `title="${reason}"` : ''}>
-        <div class="sw"></div>
-        <div class="toggle-content">
-          <div class="toggle-name">
-            ${opt.name}
-            ${isRec ? `<span class="badge badge-rec">Aanbevolen voor ${styleName}</span>` : ''}
-          </div>
-          <div class="toggle-desc">${opt.desc}</div>
-          ${disabled ? `<div class="toggle-reason">${reason}</div>` : ''}
-        </div>
-        <div class="toggle-price">${eur(opt.price)}</div>
+/* ════════════════════════════════════
+   RENDER – Step 3
+════════════════════════════════════ */
+function renderOptions(){
+  const el=document.getElementById('options-list');
+  el.innerHTML=OPTIONS.map(opt=>{
+    const hidden=opt.cornerOnly&&!isCorner();
+    const reason=disabledOptReason(opt);
+    const sel=state.options.has(opt.id);
+    const rec=state.style&&opt.recommended.includes(state.style);
+    const styleName=state.style?STYLES.find(s=>s.id===state.style)?.name:'';
+    let cls='toggle-item';
+    if(hidden)cls+=' is-hidden'; if(reason)cls+=' is-disabled'; if(sel)cls+=' is-selected';
+    return `<div class="${cls}" data-opt="${opt.id}" role="checkbox" aria-checked="${sel}" tabindex="${reason?-1:0}" ${reason?`title="${reason}"`:''}">
+      <div class="sw"></div>
+      <div class="toggle-content">
+        <div class="toggle-name">${opt.name}${rec?`<span class="badge badge-rec">Aanbevolen voor ${styleName}</span>`:''}</div>
+        <div class="toggle-desc">${opt.desc}</div>
+        ${reason?`<div class="toggle-reason">${reason}</div>`:''}
       </div>
-    `;
+      <div class="toggle-price">${eur(opt.price)}</div>
+    </div>`;
   }).join('');
-
-  list.querySelectorAll('.toggle-item:not(.is-disabled):not(.is-hidden)').forEach(el => {
-    const toggle = () => {
-      const id = el.dataset.opt;
-      if (state.options.has(id)) {
-        state.options.delete(id);
-      } else {
-        state.options.add(id);
-      }
-      update();
-    };
-    el.addEventListener('click', toggle);
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  el.querySelectorAll('.toggle-item:not(.is-disabled):not(.is-hidden)').forEach(el2=>{
+    const t=()=>{const id=el2.dataset.opt;state.options.has(id)?state.options.delete(id):state.options.add(id);update();};
+    el2.addEventListener('click',t);
+    el2.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});
   });
 }
 
-/* ══════════════════════════════════════════════
-   RENDER – Step 4: Appliances
-══════════════════════════════════════════════ */
-function renderAppliances() {
-  const list = document.getElementById('appliances-list');
-
-  list.innerHTML = APPLIANCES.map(app => {
-    const reason   = disabledApplianceReason(app);
-    const disabled = !!reason;
-    const selected = state.appliances.has(app.id);
-
-    let cls = 'toggle-item';
-    if (disabled)  cls += ' is-disabled';
-    if (selected)  cls += ' is-selected';
-
-    return `
-      <div class="${cls}" data-app="${app.id}"
-           role="checkbox" aria-checked="${selected}" tabindex="${disabled ? -1 : 0}"
-           ${disabled ? `title="${reason}"` : ''}>
-        <div class="sw"></div>
-        <div class="toggle-content">
-          <div class="toggle-name">${app.name}</div>
-          <div class="toggle-desc">${app.desc}</div>
-          ${disabled ? `<div class="toggle-reason">${reason}</div>` : ''}
-        </div>
-        <div class="toggle-price">${eur(app.price)}</div>
+/* ════════════════════════════════════
+   RENDER – Step 4
+════════════════════════════════════ */
+function renderAppliances(){
+  const el=document.getElementById('appliances-list');
+  el.innerHTML=APPLIANCES.map(app=>{
+    const reason=disabledAppReason(app), sel=state.appliances.has(app.id);
+    let cls='toggle-item'; if(reason)cls+=' is-disabled'; if(sel)cls+=' is-selected';
+    return `<div class="${cls}" data-app="${app.id}" role="checkbox" aria-checked="${sel}" tabindex="${reason?-1:0}" ${reason?`title="${reason}"`:''}">
+      <div class="sw"></div>
+      <div class="toggle-content">
+        <div class="toggle-name">${app.name}</div>
+        <div class="toggle-desc">${app.desc}</div>
+        ${reason?`<div class="toggle-reason">${reason}</div>`:''}
       </div>
-    `;
+      <div class="toggle-price">${eur(app.price)}</div>
+    </div>`;
   }).join('');
-
-  list.querySelectorAll('.toggle-item:not(.is-disabled)').forEach(el => {
-    const toggle = () => {
-      const id = el.dataset.app;
-      if (state.appliances.has(id)) {
-        state.appliances.delete(id);
-      } else {
-        state.appliances.add(id);
-      }
-      update();
-    };
-    el.addEventListener('click', toggle);
-    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  el.querySelectorAll('.toggle-item:not(.is-disabled)').forEach(el2=>{
+    const t=()=>{const id=el2.dataset.app;state.appliances.has(id)?state.appliances.delete(id):state.appliances.add(id);update();};
+    el2.addEventListener('click',t);
+    el2.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t();}});
   });
 }
 
-/* ══════════════════════════════════════════════
+/* ════════════════════════════════════
+   RENDER – Step 5
+════════════════════════════════════ */
+function renderStep5(){
+  const cg=document.getElementById('color-grid');
+  cg.innerHTML=COLORS.map(c=>`
+    <div class="color-swatch${state.color===c.id?' selected':''}" data-color="${c.id}">
+      <div class="color-dot" style="background:${c.hex};${c.dark?'border-color:#fff2':''}"></div>
+      <span>${c.name}</span>
+    </div>`).join('');
+  cg.querySelectorAll('.color-swatch').forEach(sw=>{
+    sw.addEventListener('click',()=>{state.color=state.color===sw.dataset.color?null:sw.dataset.color;update();});
+  });
+
+  const fr=document.getElementById('finish-row');
+  fr.innerHTML=FINISHES.map(f=>`
+    <button class="finish-btn${state.finish===f.id?' selected':''}" data-finish="${f.id}">
+      <span class="finish-btn-name">${f.name}</span>
+      <span class="finish-btn-desc">${f.desc}</span>
+    </button>`).join('');
+  fr.querySelectorAll('.finish-btn').forEach(b=>{
+    b.addEventListener('click',()=>{state.finish=state.finish===b.dataset.finish?null:b.dataset.finish;update();});
+  });
+}
+
+/* ════════════════════════════════════
+   RENDER – Field messages
+════════════════════════════════════ */
+function renderFieldMsgs(){
+  const wMsg=document.getElementById('msg-width'), wInp=document.getElementById('inp-width'), ws=widthStatus();
+  wInp.classList.remove('has-error'); wMsg.className='field-msg'; wMsg.textContent='';
+  if(ws==='low'){wInp.classList.add('has-error');wMsg.classList.add('err');wMsg.textContent='Minimum breedte is 150 cm.';}
+  else if(ws==='high'){wInp.classList.add('has-error');wMsg.classList.add('err');wMsg.textContent='Maximum breedte is 600 cm.';}
+  else if(ws==='ok'&&parseFloat(state.width)>450){wMsg.classList.add('warn');wMsg.textContent='Tip: overweeg een U-vorm of Eiland opstelling voor deze breedte.';}
+
+  const dMsg=document.getElementById('msg-depth'), dInp=document.getElementById('inp-depth'), dv=parseFloat(state.depth);
+  dInp.classList.remove('has-error'); dMsg.className='field-msg'; dMsg.textContent='';
+  if(state.depth&&(dv<50||dv>90)){dInp.classList.add('has-error');dMsg.classList.add('err');dMsg.textContent=dv<50?'Minimum diepte is 50 cm.':'Maximum diepte is 90 cm.';}
+}
+
+/* ════════════════════════════════════
    RENDER – Sidebar
-══════════════════════════════════════════════ */
-function renderSidebar() {
-  const body   = document.getElementById('sidebar-body');
-  const { basePrice, setupSurcharge, optTotal, appTotal, subtotal, vat, total } = calculate();
-  const style  = getStyle();
-  const setup  = getSetup();
-  const dv     = getDelivery();
-  const ready  = state.style && dimensionsOk();
+════════════════════════════════════ */
+function renderSidebar(){
+  const body=document.getElementById('sidebar-body');
+  const {base,setupExtra,optTotal,appTotal,sub,vat,total}=calculate();
+  const style=getStyle(), setup=getSetup(), dv=getDelivery(), ready=state.style&&dimsOk();
 
-  /* Build option rows */
-  const optRows = [...state.options].map(id => {
-    const o = OPTIONS.find(x => x.id === id);
-    return o ? `<div class="q-row"><span class="q-name">${o.name}</span><span class="q-val">${eur(o.price)}</span></div>` : '';
-  }).join('');
+  const optRows=[...state.options].map(id=>{const o=OPTIONS.find(x=>x.id===id);return o?`<div class="q-row"><span class="q-name">${o.name}</span><span class="q-val">${eur(o.price)}</span></div>`:''}).join('');
+  const appRows=[...state.appliances].map(id=>{const a=APPLIANCES.find(x=>x.id===id);return a?`<div class="q-row"><span class="q-name">${a.name}</span><span class="q-val">${eur(a.price)}</span></div>`:''}).join('');
+  const missing=[];
+  if(!state.style) missing.push('keukenstijl');
+  if(!dimsOk()) missing.push('geldige breedte');
 
-  const appRows = [...state.appliances].map(id => {
-    const a = APPLIANCES.find(x => x.id === id);
-    return a ? `<div class="q-row"><span class="q-name">${a.name}</span><span class="q-val">${eur(a.price)}</span></div>` : '';
-  }).join('');
-
-  /* Style section */
-  const styleSection = style ? `
-    <div class="q-section">
+  body.innerHTML=`
+    ${style?`<div class="q-section">
       <div class="q-label">Basisprijs</div>
-      <div class="q-row">
-        <span class="q-name">${style.name} (${eur(style.price)}/m)</span>
-        <span class="q-val">${dimensionsOk() ? eur(basePrice) : '–'}</span>
-      </div>
-      ${setup && setup.surcharge ? `
-        <div class="q-row">
-          <span class="q-name">Opstelling ${setup.name}</span>
-          <span class="q-val">+ ${eur(setupSurcharge)}</span>
-        </div>` : ''}
-    </div>
-  ` : `<p class="empty-hint">Kies een stijl om te beginnen…</p>`;
+      <div class="q-row"><span class="q-name">${style.name} (${eur(style.price)}/m)</span><span class="q-val">${dimsOk()?eur(base):'–'}</span></div>
+      ${setup&&setup.surcharge?`<div class="q-row"><span class="q-name">Opstelling ${setup.name}</span><span class="q-val">+ ${eur(setupExtra)}</span></div>`:''}
+    </div>`:'<p class="empty-hint">Kies een stijl om te beginnen…</p>'}
+    ${state.options.size?`<div class="q-section"><div class="q-label">Opties &amp; materialen</div>${optRows}</div>`:''}
+    ${state.appliances.size?`<div class="q-section"><div class="q-label">Inbouwapparatuur</div>${appRows}</div>`:''}
+    ${style?`<div class="q-divider"></div>
+    <div class="q-total-row muted"><span>Subtotaal excl. BTW</span><span>${eur(sub)}</span></div>
+    <div class="q-total-row muted"><span>BTW (21%)</span><span>${eur(vat)}</span></div>
+    <div class="q-total-row big"><span>Totaal incl. BTW</span><span>${eur(total)}</span></div>
+    <div class="q-divider"></div>`:'<div class="q-divider"></div>'}
+    ${dv?`<div class="delivery-tag"><span>&#128667;</span><span>Levertijd: <strong>${dv}</strong></span></div>`:''}
+    ${missing.length?`<div class="warn-box show">Vul nog in: <strong>${missing.join(' en ')}</strong>.</div>`:''}
+    <button class="btn-cta" id="btn-quote" ${ready?'':'disabled'}>Offerte aanvragen</button>`;
 
-  /* Options section */
-  const optSection = state.options.size > 0 ? `
-    <div class="q-section">
-      <div class="q-label">Opties &amp; materialen</div>
-      ${optRows}
-    </div>
-  ` : '';
-
-  /* Appliances section */
-  const appSection = state.appliances.size > 0 ? `
-    <div class="q-section">
-      <div class="q-label">Inbouwapparatuur</div>
-      ${appRows}
-    </div>
-  ` : '';
-
-  /* Delivery */
-  const deliverySection = dv ? `
-    <div class="delivery-tag">
-      <span class="icon">&#128667;</span>
-      <span>Levertijd: <strong>${dv}</strong></span>
-    </div>
-  ` : '';
-
-  /* Totals */
-  const totalsSection = style ? `
-    <div class="q-divider"></div>
-    <div class="q-total-row muted">
-      <span>Subtotaal excl. BTW</span>
-      <span>${eur(subtotal)}</span>
-    </div>
-    <div class="q-total-row muted">
-      <span>BTW (21%)</span>
-      <span>${eur(vat)}</span>
-    </div>
-    <div class="q-total-row big">
-      <span>Totaal incl. BTW</span>
-      <span>${eur(total)}</span>
-    </div>
-    <div class="q-divider"></div>
-  ` : '<div class="q-divider"></div>';
-
-  /* Missing fields warning */
-  const missingParts = [];
-  if (!state.style)       missingParts.push('keukenstijl');
-  if (!dimensionsOk())    missingParts.push('geldige breedte');
-
-  const missingWarn = missingParts.length ? `
-    <div class="warn-box show">
-      Vul nog in: <strong>${missingParts.join(' en ')}</strong> om een offerte aan te vragen.
-    </div>
-  ` : '';
-
-  body.innerHTML = `
-    ${styleSection}
-    ${optSection}
-    ${appSection}
-    ${totalsSection}
-    ${deliverySection}
-    ${missingWarn}
-    <button class="btn-cta" id="btn-quote" ${ready ? '' : 'disabled'}>
-      Offerte aanvragen
-    </button>
-  `;
-
-  document.getElementById('btn-quote')?.addEventListener('click', () => {
-    alert('Bedankt voor uw interesse!\n\nIn een echte implementatie wordt hier het offerteformulier geopend of de gegevens verstuurd.\n\nWe nemen zo snel mogelijk contact met u op.');
+  document.getElementById('btn-quote')?.addEventListener('click',()=>{
+    alert('Bedankt! In een echte implementatie wordt hier het offerteformulier geopend.');
   });
 }
 
-/* ══════════════════════════════════════════════
-   RENDER – Width/Depth validation messages
-══════════════════════════════════════════════ */
-function renderFieldMessages() {
-  const wMsg = document.getElementById('msg-width');
-  const wInp = document.getElementById('inp-width');
-  const wv   = widthValid();
+/* ════════════════════════════════════
+   RENDER – Generate button
+════════════════════════════════════ */
+function renderGenerateBtn(){
+  const btn=document.getElementById('btn-generate');
+  btn.disabled=!(state.style&&dimsOk());
+}
 
-  wInp.classList.remove('has-error');
-  wMsg.className = 'field-msg';
-  wMsg.textContent = '';
+/* ════════════════════════════════════
+   CLAUDE API
+════════════════════════════════════ */
+async function generateDesign(){
+  if(!state.apiKey){alert('Voer eerst uw Anthropic API-sleutel in de balk bovenaan de pagina in.');return;}
+  if(!state.style||!dimsOk()){alert('Vul minimaal een stijl en geldige breedte in.');return;}
 
-  if (wv === 'low') {
-    wInp.classList.add('has-error');
-    wMsg.classList.add('err');
-    wMsg.textContent = 'Minimum breedte is 150 cm.';
-  } else if (wv === 'high') {
-    wInp.classList.add('has-error');
-    wMsg.classList.add('err');
-    wMsg.textContent = 'Maximum breedte is 600 cm.';
-  } else if (wv === 'ok') {
-    const w = parseFloat(state.width);
-    if (w > 450) {
-      wMsg.classList.add('warn');
-      wMsg.textContent = 'Tip: overweeg een U-vorm of Eiland opstelling voor deze breedte.';
-    }
-  }
+  const style=getStyle(), setup=getSetup();
+  const selOpts=[...state.options].map(id=>OPTIONS.find(o=>o.id===id)?.name).filter(Boolean);
+  const selApps=[...state.appliances].map(id=>APPLIANCES.find(a=>a.id===id)?.name).filter(Boolean);
+  const colorObj=COLORS.find(c=>c.id===state.color);
+  const finishObj=FINISHES.find(f=>f.id===state.finish);
+  const worktop=selOpts.find(n=>n?.includes('werkblad'))||'standaard laminaat';
 
-  /* Depth */
-  const dMsg = document.getElementById('msg-depth');
-  const dInp = document.getElementById('inp-depth');
-  const d    = parseFloat(state.depth);
+  const prompt=`You are an expert kitchen designer. Generate a vivid, detailed description of a kitchen visualization.
 
-  dInp.classList.remove('has-error');
-  dMsg.className = 'field-msg';
-  dMsg.textContent = '';
+Kitchen specifications:
+- Style: ${style.name}
+- Width: ${state.width}cm, Depth: ${state.depth}cm, Height: ${state.height}cm
+- Layout: ${setup.name}
+- Worktop: ${worktop}
+- Door finish: ${finishObj?.name||'Mat'}
+- Color palette: ${colorObj?.name||'Wit'}
+- Appliances: ${selApps.join(', ')||'none'}
+- Special wishes: ${state.wishes||'none'}
 
-  if (state.depth && (d < 50 || d > 90)) {
-    dInp.classList.add('has-error');
-    dMsg.classList.add('err');
-    dMsg.textContent = d < 50 ? 'Minimum diepte is 50 cm.' : 'Maximum diepte is 90 cm.';
+Return ONLY a valid JSON object (no markdown, no explanation) with exactly these fields:
+{
+  "imagePrompt": "A photorealistic interior render of a ${style.name.toLowerCase()} kitchen, [color], [worktop], [layout], natural light, professional photography, 8k resolution — write an 80-word image generation prompt",
+  "designTitle": "Short poetic Dutch name for this kitchen (max 5 words)",
+  "designDescription": "Two sentences describing this design to the Dutch client",
+  "highlights": ["3 to 5 short Dutch bullet points about key design choices"],
+  "styleAdvice": "One sentence of professional Dutch styling advice"
+}`;
+
+  showLoading();
+  hideError();
+  hideResults();
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':state.apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true',
+      },
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1024,
+        messages:[{role:'user',content:prompt}],
+      }),
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||`API fout ${res.status}`);}
+    const data=await res.json();
+    const text=data.content[0].text;
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('Geen geldige JSON ontvangen van Claude.');
+    const design=JSON.parse(m[0]);
+    hideLoading();
+    renderVisualization(design);
+  }catch(err){
+    hideLoading();
+    showError(err.message);
   }
 }
 
-/* ══════════════════════════════════════════════
+function showLoading(){document.getElementById('viz-loading').classList.add('show');}
+function hideLoading(){document.getElementById('viz-loading').classList.remove('show');}
+function showError(msg){const e=document.getElementById('viz-error');e.classList.add('show');e.innerHTML=`<strong>Fout bij genereren:</strong> ${msg}<br><small>Controleer uw API-sleutel en probeer opnieuw.</small>`;}
+function hideError(){document.getElementById('viz-error').classList.remove('show');}
+function hideResults(){document.getElementById('viz-grid').style.display='none';document.getElementById('design-card').style.display='none';}
+
+function renderVisualization(design){
+  // SVGs
+  document.getElementById('floorplan-wrap').innerHTML=buildFloorPlan();
+  document.getElementById('perspective-wrap').innerHTML=buildPerspective();
+  document.getElementById('viz-grid').style.display='grid';
+
+  // Design card
+  document.getElementById('dc-title').textContent=design.designTitle||'Uw keukenontwerp';
+  document.getElementById('dc-desc').textContent=design.designDescription||'';
+  const hl=document.getElementById('dc-highlights');
+  hl.innerHTML=(design.highlights||[]).map(h=>`<li>${h}</li>`).join('');
+  document.getElementById('dc-advice').textContent=design.styleAdvice||'';
+  const pt=document.getElementById('dc-prompt');
+  pt.value=design.imagePrompt||'';
+  document.getElementById('design-card').style.display='block';
+
+  // Scroll to viz
+  document.getElementById('viz-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ════════════════════════════════════
    MASTER UPDATE
-══════════════════════════════════════════════ */
-function update() {
+════════════════════════════════════ */
+function update(){
   renderStyles();
   renderHeights();
   renderSetup();
   renderOptions();
   renderAppliances();
-  renderFieldMessages();
+  renderStep5();
+  renderFieldMsgs();
   renderSidebar();
+  renderGenerateBtn();
 }
 
-/* ══════════════════════════════════════════════
-   INPUT BINDINGS (width / depth)
-══════════════════════════════════════════════ */
-document.getElementById('inp-width').addEventListener('input', e => {
-  state.width = e.target.value;
-  update();
+/* ════════════════════════════════════
+   EVENT BINDINGS
+════════════════════════════════════ */
+document.getElementById('api-key-inp').addEventListener('input',e=>{state.apiKey=e.target.value.trim();});
+document.getElementById('inp-width').addEventListener('input',e=>{state.width=e.target.value;update();});
+document.getElementById('inp-depth').addEventListener('input',e=>{state.depth=e.target.value;update();});
+document.getElementById('inp-wishes').addEventListener('input',e=>{
+  state.wishes=e.target.value;
+  document.getElementById('char-count').textContent=e.target.value.length;
+});
+document.getElementById('btn-generate').addEventListener('click',generateDesign);
+document.getElementById('btn-copy-prompt').addEventListener('click',()=>{
+  const ta=document.getElementById('dc-prompt');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const btn=document.getElementById('btn-copy-prompt');
+    btn.textContent='Gekopieerd!';
+    setTimeout(()=>{btn.textContent='Kopieer';},2000);
+  });
 });
 
-document.getElementById('inp-depth').addEventListener('input', e => {
-  state.depth = e.target.value;
-  update();
-});
-
-/* ══════════════════════════════════════════════
-   BOOT
-══════════════════════════════════════════════ */
+/* ════════════════════════════════════
+   INIT
+════════════════════════════════════ */
 update();
 </script>
 </body>
