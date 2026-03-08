@@ -943,31 +943,46 @@ Return ONLY a valid JSON object (no markdown, no explanation) with exactly these
   hideResults();
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':state.apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true',
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:1024,
-        messages:[{role:'user',content:prompt}],
-      }),
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||`API fout ${res.status}`);}
+    let res;
+    try{
+      res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key':state.apiKey,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true',
+        },
+        body:JSON.stringify({
+          model:'claude-3-5-haiku-20241022',
+          max_tokens:1024,
+          messages:[{role:'user',content:prompt}],
+        }),
+      });
+    }catch(networkErr){
+      hideLoading();
+      showError(`Netwerkfout: ${networkErr.message}. Controleer uw internetverbinding.`);
+      return;
+    }
+    if(!res.ok){
+      let errMsg=`HTTP ${res.status}`;
+      try{const e=await res.json();errMsg=e.error?.message||errMsg;}catch(_){}
+      hideLoading();
+      showError(`API fout (${res.status}): ${errMsg}`);
+      return;
+    }
     const data=await res.json();
-    const text=data.content[0].text;
+    const text=data.content?.[0]?.text||'';
     const m=text.match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('Geen geldige JSON ontvangen van Claude.');
-    const design=JSON.parse(m[0]);
+    if(!m){hideLoading();showError('Claude stuurde geen JSON terug. Probeer opnieuw.');return;}
+    let design;
+    try{design=JSON.parse(m[0]);}
+    catch(pe){hideLoading();showError('JSON parsing mislukt: '+pe.message);return;}
     hideLoading();
     renderVisualization(design);
   }catch(err){
     hideLoading();
-    showError(err.message);
+    showError('Onverwachte fout: '+err.message);
   }
 }
 
