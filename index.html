@@ -99,6 +99,12 @@ input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appear
 
 /* ── Appliance toggles ── */
 .appl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:.65rem}
+.brand-btn{padding:.55rem 1.1rem;border:2px solid var(--border);border-radius:8px;background:var(--cream);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;color:var(--char);transition:.2s;display:flex;align-items:center;gap:.4rem}
+.brand-btn:hover{border-color:var(--oak-lt)}
+.brand-btn.active{border-color:var(--oak);background:#FBF6F0;font-weight:600}
+.appl-model{font-size:.7rem;color:#999;font-family:monospace;margin-top:.15rem}
+.appl-link{font-size:.7rem;color:var(--oak);text-decoration:none;display:inline-flex;align-items:center;gap:.2rem;margin-top:.2rem}
+.appl-link:hover{text-decoration:underline}
 .pos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:.65rem;margin-top:.875rem}
 
 /* ── Color picker ── */
@@ -270,6 +276,17 @@ table.dt .tr-tot td{background:var(--cream-dk);font-weight:600;border-top:2px so
 <!-- Step 4 -->
 <div class="card">
   <div class="card-hd"><div class="step-badge">4</div><h2>Apparatuur</h2></div>
+  <div style="margin-bottom:1rem">
+    <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.5rem">Merk — actuele prijzen via <a href="https://www.inbouw.nl" target="_blank" style="color:var(--oak);text-decoration:none">inbouw.nl</a></div>
+    <div style="display:flex;gap:.6rem">
+      <button class="brand-btn" id="brand-siemens" onclick="setBrand('siemens')">
+        <span style="font-size:1rem">🔵</span> Siemens
+      </button>
+      <button class="brand-btn" id="brand-bosch" onclick="setBrand('bosch')">
+        <span style="font-size:1rem">🔴</span> Bosch
+      </button>
+    </div>
+  </div>
   <div class="appl-grid" id="applGrid"></div>
   <div style="margin-top:1rem" id="posWrap">
     <div style="font-size:.78rem;font-weight:500;color:var(--char-lt);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.4rem">Positionering</div>
@@ -421,14 +438,39 @@ const OPTIONS = [
   {id:'carrousel', name:'Carrousel hoekoplossing', price:680,  excl:[], note:'Alleen bij hoek/U-vorm', cornerOnly:true}
 ];
 
-const APPLIANCES = [
-  {id:'oven',       name:'Inbouw oven',       price:890,  excl:['stoomoven'], icon:'▭'},
-  {id:'inductie',   name:'Inductiekookplaat', price:680,  excl:[], icon:'◉'},
-  {id:'vaatwasser', name:'Vaatwasser',        price:740,  excl:[], icon:'≋'},
-  {id:'koelkast',   name:'Koel-vriescombinatie',price:820,excl:[], icon:'❄'},
-  {id:'afzuigkap',  name:'Afzuigkap',         price:620,  excl:[], icon:'↑'},
-  {id:'stoomoven',  name:'Stoomoven',         price:1480, excl:['oven'], icon:'☁'}
-];
+// Prijzen rechtstreeks van inbouw.nl (actuele winkelprijs, excl. BTW)
+const APPLIANCE_BRANDS = {
+  siemens: {
+    label: 'Siemens',
+    url:   'https://www.inbouw.nl/merk/siemens',
+    items: [
+      {id:'oven',       name:'Inbouw oven',        model:'HB734G1B1',   price:749,  excl:['stoomoven'], icon:'▭', url:'https://www.inbouw.nl/product/hb734g1b1'},
+      {id:'inductie',   name:'Inductiekookplaat',  model:'EU63KBEB5D',  price:491,  excl:[], icon:'◉', url:'https://www.inbouw.nl/product/eu63kbeb5d'},
+      {id:'vaatwasser', name:'Vaatwasser',         model:'SN61HX02UN',  price:629,  excl:[], icon:'≋', url:'https://www.inbouw.nl/product/sn61hx02un'},
+      {id:'koelkast',   name:'Inbouwkoelkast',     model:'KI81RADD0',   price:894,  excl:[], icon:'❄', url:'https://www.inbouw.nl/product/ki81radd0'},
+      {id:'afzuigkap',  name:'Afzuigkap',          model:'LC67KHM60',   price:549,  excl:[], icon:'↑', url:'https://www.inbouw.nl/merk/siemens'},
+      {id:'stoomoven',  name:'Combi stoomoven',    model:'CD634GBS1',   price:727,  excl:['oven'], icon:'☁', url:'https://www.inbouw.nl/product/cd634gbs1'},
+    ]
+  },
+  bosch: {
+    label: 'Bosch',
+    url:   'https://www.inbouw.nl/merk/bosch',
+    items: [
+      {id:'oven',       name:'Inbouw oven',        model:'HBG536EB3',   price:645,  excl:['stoomoven'], icon:'▭', url:'https://www.inbouw.nl/product/hbg536eb3'},
+      {id:'inductie',   name:'Inductiekookplaat',  model:'PUE611BB5D',  price:398,  excl:[], icon:'◉', url:'https://www.inbouw.nl/product/pue611bb5d'},
+      {id:'vaatwasser', name:'Vaatwasser',         model:'SMV46KX55E',  price:499,  excl:[], icon:'≋', url:'https://www.inbouw.nl/product/smv46kx55e'},
+      {id:'koelkast',   name:'Inbouwkoelkast',     model:'KIR81AFE0',   price:918,  excl:[], icon:'❄', url:'https://www.inbouw.nl/product/kir81afe0'},
+      {id:'afzuigkap',  name:'Afzuigkap',          model:'DFR067A50',   price:289,  excl:[], icon:'↑', url:'https://www.inbouw.nl/product/dfr067a50'},
+      {id:'stoomoven',  name:'Combi stoomoven',    model:'CDG634BS1',   price:797,  excl:['oven'], icon:'☁', url:'https://www.inbouw.nl/product/cdg634bs1'},
+    ]
+  }
+};
+
+// Actieve APPLIANCES list wordt bepaald door state.brand
+function getAppliances() {
+  return APPLIANCE_BRANDS[state.brand]?.items || APPLIANCE_BRANDS.siemens.items;
+}
+const APPLIANCES = APPLIANCE_BRANDS.siemens.items; // fallback voor prod-tab refs
 
 const COLORS = [
   {id:'wit',     name:'Wit',          hex:'#F5F5F5'},
@@ -462,6 +504,7 @@ const state = {
   depth:   60,
   height:  215,
   layout:  'recht',
+  brand:   'siemens',
   options: new Set(),
   appliances: new Set(),
   appliancePos: {},
@@ -582,21 +625,35 @@ function isDisabledOpt(o) {
 }
 
 function renderAppliances() {
+  const appliances = getAppliances();
+  // sync brand buttons
+  document.getElementById('brand-siemens')?.classList.toggle('active', state.brand==='siemens');
+  document.getElementById('brand-bosch')?.classList.toggle('active', state.brand==='bosch');
+
   const ag = document.getElementById('applGrid');
-  ag.innerHTML = APPLIANCES.map(a => {
+  ag.innerHTML = appliances.map(a => {
     const disabled = a.excl.some(e => state.appliances.has(e));
     const selected = state.appliances.has(a.id);
     const cls = [selected?'sel':'', disabled?'disabled':''].join(' ');
+    const brandLabel = APPLIANCE_BRANDS[state.brand]?.label || 'Siemens';
     return `<div class="opt-card ${cls}" onclick="toggleAppl('${a.id}')">
       <div class="opt-chk"></div>
-      <div>
-        <div class="opt-name">${a.name}</div>
-        <div class="opt-price">€${a.price.toLocaleString('nl')}</div>
-        ${disabled?`<div class="opt-note">${a.excl.map(e=>APPLIANCES.find(x=>x.id===e)?.name||e).join(', ')} excl.</div>`:''}
+      <div style="min-width:0">
+        <div class="opt-name">${a.icon} ${a.name}</div>
+        <div class="opt-price">€${a.price.toLocaleString('nl-NL')}</div>
+        <div class="appl-model">${brandLabel} ${a.model}</div>
+        <a class="appl-link" href="${a.url}" target="_blank" onclick="event.stopPropagation()">↗ inbouw.nl</a>
+        ${disabled?`<div class="opt-note" style="color:#c0392b">${a.excl.map(e=>appliances.find(x=>x.id===e)?.name||e).join(', ')} excl.</div>`:''}
       </div>
     </div>`;
   }).join('');
   renderPositions();
+}
+
+function setBrand(brand) {
+  state.brand = brand;
+  // Remove appliances that may conflict between brands (keep selection, just reprice)
+  recalculate();
 }
 
 function renderPositions() {
@@ -639,7 +696,7 @@ function toggleOpt(id) {
   renderOptions(); recalculate();
 }
 function toggleAppl(id) {
-  const a = APPLIANCES.find(x=>x.id===id);
+  const a = getAppliances().find(x=>x.id===id);
   if (!a) return;
   if (a.excl.some(e=>state.appliances.has(e))) return;
   if (state.appliances.has(id)) {
@@ -692,7 +749,7 @@ function deriveCabinets() {
   const tallAppl = ['oven','koelkast','stoomoven'];
   tallAppl.forEach(aId => {
     if (state.appliances.has(aId)) {
-      const a = APPLIANCES.find(x=>x.id===aId);
+      const a = getAppliances().find(x=>x.id===aId);
       pushTall(MODULE, a.name);
     }
   });
@@ -979,7 +1036,7 @@ function calcPrice() {
   });
   let applTotal = 0;
   state.appliances.forEach(id=>{
-    const a=APPLIANCES.find(x=>x.id===id);
+    const a=getAppliances().find(x=>x.id===id);
     if(a) applTotal+=a.price;
   });
 
@@ -1037,7 +1094,7 @@ function drawFloorPlan() {
   const applColors = {inductie:'#FF7043',vaatwasser:'#42A5F5',koelkast:'#26C6DA',oven:'#AB47BC',stoomoven:'#EC407A',afzuigkap:'#78909C'};
   let appX = ox;
   state.appliances.forEach(aId => {
-    const a = APPLIANCES.find(x=>x.id===aId);
+    const a = getAppliances().find(x=>x.id===aId);
     const col = applColors[aId]||'#999';
     const bw = Math.min(sw*0.15, 40);
     html += `<rect x="${appX+2}" y="${oy+sd*0.05}" width="${bw-4}" height="${sd*0.7}" fill="${col}" opacity="0.75" rx="3"/>`;
@@ -1367,7 +1424,7 @@ function renderSidebar() {
   if (state.appliances.size > 0) {
     lines += `<div class="pl sec"><span class="pll">Apparatuur</span></div>`;
     state.appliances.forEach(id => {
-      const a = APPLIANCES.find(x=>x.id===id);
+      const a = getAppliances().find(x=>x.id===id);
       if(a) lines += pl(a.name, `€${a.price.toLocaleString('nl')}`);
     });
   }
@@ -1451,7 +1508,7 @@ async function runAIViz() {
   const colorData  = COLORS.find(c=>c.id===state.color)||COLORS[0];
   const finishData = FINISHES.find(f=>f.id===state.finish)||FINISHES[0];
   const selectedOpts = OPTIONS.filter(o=>state.options.has(o.id)).map(o=>o.name);
-  const selectedAppl = APPLIANCES.filter(a=>state.appliances.has(a.id)).map(a=>a.name);
+  const selectedAppl = getAppliances().filter(a=>state.appliances.has(a.id)).map(a=>a.name);
 
   const prompt = `Je bent een interieurontwerper gespecialiseerd in keukens. Genereer een gedetailleerde ontwerp­beschrijving voor de volgende keuken­configuratie:
 
