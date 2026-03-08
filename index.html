@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keuken Offerte Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:       #F6F1E8;
+      --cream-dark:  #EDE6D7;
+      --oak:         #C4935A;
+      --oak-dark:    #A87540;
+      --oak-light:   #DEBB90;
+      --oak-muted:   rgba(196,147,90,.12);
+      --text:        #2A2016;
+      --text-muted:  #7A6E5D;
+      --border:      #D9CFBE;
+      --white:       #FEFCF7;
+      --error:       #B03030;
+      --error-bg:    #FDF0EF;
+      --warn:        #A06010;
+      --warn-bg:     #FEF8EC;
+      --disabled:    #BEB5A8;
+      --shadow:      0 2px 12px rgba(42,32,22,.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Header ─────────────────────────────── */
+    .site-header {
+      background: var(--white);
+      border-bottom: 2px solid var(--oak-light);
+      padding: 1.1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo-mark {
+      width: 46px; height: 46px;
+      background: var(--oak);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 1.4rem;
+      color: #fff;
+    }
+    .site-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      line-height: 1.2;
+    }
+    .site-header p {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Layout ──────────────────────────────── */
+    .app {
+      display: flex;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 2rem 1.75rem;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+    .main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1.5rem; }
+    .sidebar { width: 360px; flex-shrink: 0; position: sticky; top: 1.5rem; }
+
+    /* ── Step card ───────────────────────────── */
+    .step {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .step-head {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--cream-dark);
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+    }
+    .step-num {
+      width: 30px; height: 30px;
+      background: var(--oak);
+      color: #fff;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+    }
+    .step-body { padding: 1.5rem; }
+
+    /* ── Style cards ─────────────────────────── */
+    .style-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    .style-card {
+      position: relative;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      cursor: pointer;
+      background: var(--cream);
+      transition: border-color .2s, background .2s, box-shadow .2s;
+      user-select: none;
+    }
+    .style-card:hover { border-color: var(--oak-light); background: var(--white); }
+    .style-card.selected {
+      border-color: var(--oak);
+      background: var(--white);
+      box-shadow: 0 0 0 4px var(--oak-muted);
+    }
+    .style-card-icon { font-size: 1.6rem; margin-bottom: .4rem; line-height: 1; }
+    .style-card-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; }
+    .style-card-desc { font-size: .78rem; color: var(--text-muted); margin: .2rem 0 .5rem; }
+    .style-card-price { font-size: .82rem; font-weight: 600; color: var(--oak); }
+    .check-mark {
+      position: absolute;
+      top: .7rem; right: .7rem;
+      width: 22px; height: 22px;
+      background: var(--oak);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: .7rem;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .style-card.selected .check-mark { opacity: 1; }
+
+    /* ── Dimensions ──────────────────────────── */
+    .dim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .form-group { display: flex; flex-direction: column; gap: .35rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: .85rem; font-weight: 500; }
+
+    .input-wrap { position: relative; }
+    input[type="number"], select {
+      width: 100%;
+      padding: .65rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      background: var(--cream);
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input[type="number"]:focus, select:focus { border-color: var(--oak); }
+    input.has-error { border-color: var(--error) !important; }
+    .input-unit {
+      position: absolute;
+      right: .8rem; top: 50%;
+      transform: translateY(-50%);
+      font-size: .78rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    .field-msg {
+      font-size: .78rem;
+      min-height: 1.1em;
+      line-height: 1.3;
+    }
+    .field-msg.err { color: var(--error); }
+    .field-msg.warn {
+      color: var(--warn);
+      background: var(--warn-bg);
+      padding: .35rem .6rem;
+      border-radius: 6px;
+      border-left: 3px solid var(--warn);
+    }
+
+    /* height toggle */
+    .btn-group { display: flex; gap: .5rem; }
+    .btn-pill {
+      flex: 1;
+      padding: .65rem .4rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      background: var(--cream);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      color: var(--text);
+      text-align: center;
+      transition: all .2s;
+    }
+    .btn-pill:hover { border-color: var(--oak-light); }
+    .btn-pill.selected { border-color: var(--oak); background: var(--white); color: var(--oak); font-weight: 600; }
+
+    /* setup grid */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: .75rem;
+    }
+    .setup-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .8rem 1rem;
+      cursor: pointer;
+      background: var(--cream);
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      transition: all .2s;
+    }
+    .setup-card:hover { border-color: var(--oak-light); background: var(--white); }
+    .setup-card.selected { border-color: var(--oak); background: var(--white); }
+    .setup-name { font-size: .9rem; font-weight: 600; display: block; }
+    .setup-desc { font-size: .75rem; color: var(--text-muted); }
+    .setup-extra { font-size: .75rem; color: var(--oak); font-weight: 600; }
+
+    /* ── Toggles (options / appliances) ─────── */
+    .toggle-list { display: flex; flex-direction: column; gap: .7rem; }
+    .toggle-item {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: .9rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 11px;
+      background: var(--cream);
+      cursor: pointer;
+      transition: all .2s;
+      position: relative;
+      user-select: none;
+    }
+    .toggle-item:hover:not(.is-disabled) { border-color: var(--oak-light); background: var(--white); }
+    .toggle-item.is-selected { border-color: var(--oak); background: var(--white); }
+    .toggle-item.is-hidden { display: none; }
+    .toggle-item.is-disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      background: var(--cream-dark);
+    }
+
+    .sw {
+      width: 42px; height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      position: relative;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: background .2s;
+    }
+    .sw::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: left .2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,.18);
+    }
+    .toggle-item.is-selected .sw { background: var(--oak); }
+    .toggle-item.is-selected .sw::after { left: 21px; }
+
+    .toggle-content { flex: 1; min-width: 0; }
+    .toggle-name {
+      font-size: .9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .toggle-desc { font-size: .78rem; color: var(--text-muted); margin-top: .1rem; }
+    .toggle-reason { font-size: .74rem; color: var(--text-muted); font-style: italic; margin-top: .15rem; }
+    .toggle-price { font-size: .85rem; font-weight: 600; color: var(--oak); white-space: nowrap; margin-top: 2px; }
+
+    .badge {
+      font-size: .68rem;
+      padding: .12rem .45rem;
+      border-radius: 20px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .badge-rec {
+      background: rgba(196,147,90,.14);
+      color: var(--oak-dark);
+      border: 1px solid var(--oak-light);
+    }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar-panel {
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .sidebar-top {
+      background: var(--text);
+      padding: 1.25rem 1.4rem;
+      color: #fff;
+    }
+    .sidebar-top h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      margin-bottom: .15rem;
+    }
+    .sidebar-top p { font-size: .78rem; opacity: .65; }
+
+    .sidebar-body { padding: 1.25rem 1.3rem; }
+
+    .q-section { margin-bottom: .9rem; }
+    .q-label {
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--cream-dark);
+      margin-bottom: .4rem;
+    }
+    .q-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: .28rem 0;
+      font-size: .85rem;
+    }
+    .q-name { color: var(--text-muted); flex: 1; margin-right: .5rem; }
+    .q-val { font-weight: 500; white-space: nowrap; }
+
+    .q-divider { height: 1px; background: var(--cream-dark); margin: .9rem 0; }
+
+    .q-total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: .3rem 0;
+      font-size: .88rem;
+    }
+    .q-total-row.big {
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding-top: .5rem;
+    }
+    .q-total-row.muted { color: var(--text-muted); font-size: .82rem; }
+
+    .delivery-tag {
+      background: var(--cream);
+      border-radius: 9px;
+      padding: .7rem .9rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: .84rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--cream-dark);
+    }
+    .delivery-tag .icon { font-size: 1.1rem; }
+
+    .warn-box {
+      background: var(--error-bg);
+      border: 1px solid #d9a0a0;
+      border-radius: 9px;
+      padding: .75rem;
+      font-size: .8rem;
+      color: var(--error);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .warn-box.show { display: block; }
+
+    .empty-hint {
+      font-size: .82rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: .2rem 0;
+    }
+
+    .btn-cta {
+      width: 100%;
+      padding: 1rem;
+      background: var(--oak);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: background .2s, transform .15s, box-shadow .15s;
+    }
+    .btn-cta:hover:not(:disabled) {
+      background: var(--oak-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(196,147,90,.35);
+    }
+    .btn-cta:disabled { background: var(--disabled); cursor: not-allowed; }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 920px) {
+      .app { flex-direction: column; padding: 1rem; }
+      .sidebar { width: 100%; position: static; }
+    }
+    @media (max-width: 500px) {
+      .style-grid { grid-template-columns: 1fr; }
+      .dim-grid { grid-template-columns: 1fr; }
+      .setup-grid { grid-template-columns: 1fr; }
+      .site-header { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-mark">&#9633;</div>
+  <div>
+    <h1>Keuken Offerte Calculator</h1>
+    <p>Stel uw droomkeuken samen en ontvang direct een indicatieve offerte</p>
+  </div>
+</header>
+
+<div class="app">
+  <!-- ══ Main steps ══════════════════════════════ -->
+  <main class="main">
+
+    <!-- Step 1 -->
+    <section class="step">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <h2 class="step-title">Kies uw keukenstijl</h2>
+      </div>
+      <div class="step-body">
+        <div class="style-grid" id="style-grid"></div>
+      </div>
+    </section>
+
+    <!-- Step 2 -->
+    <section class="step">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <h2 class="step-title">Afmetingen &amp; opstelling</h2>
+      </div>
+      <div class="step-body">
+        <div class="dim-grid">
+          <!-- Breedte -->
+          <div class="form-group">
+            <label for="inp-width">Breedte (cm)</label>
+            <div class="input-wrap">
+              <input type="number" id="inp-width" min="150" max="600" placeholder="bijv. 300">
+              <span class="input-unit">cm</span>
+            </div>
+            <span class="field-msg" id="msg-width"></span>
+          </div>
+
+          <!-- Diepte -->
+          <div class="form-group">
+            <label for="inp-depth">Diepte (cm)</label>
+            <div class="input-wrap">
+              <input type="number" id="inp-depth" min="50" max="90" placeholder="bijv. 60">
+              <span class="input-unit">cm</span>
+            </div>
+            <span class="field-msg" id="msg-depth"></span>
+          </div>
+
+          <!-- Hoogte -->
+          <div class="form-group">
+            <label>Hoogte</label>
+            <div class="btn-group" id="height-group"></div>
+          </div>
+
+          <!-- Opstelling -->
+          <div class="form-group">
+            <label>Opstelling</label>
+            <div class="setup-grid" id="setup-grid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Step 3 -->
+    <section class="step">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <h2 class="step-title">Opties &amp; materialen</h2>
+      </div>
+      <div class="step-body">
+        <div class="toggle-list" id="options-list"></div>
+      </div>
+    </section>
+
+    <!-- Step 4 -->
+    <section class="step">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <h2 class="step-title">Inbouwapparatuur</h2>
+      </div>
+      <div class="step-body">
+        <div class="toggle-list" id="appliances-list"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ Sidebar ════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-panel">
+      <div class="sidebar-top">
+        <h2>Uw offerte indicatie</h2>
+        <p>Alle bedragen zijn exclusief BTW, tenzij vermeld</p>
+      </div>
+      <div class="sidebar-body" id="sidebar-body">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+const STYLES = [
+  { id:'modern',     name:'Modern',     icon:'◻',  desc:'Strak, minimalistisch en tijdloos',  price:2800, delivery:[8,10]  },
+  { id:'landelijk',  name:'Landelijk',  icon:'⌂',  desc:'Warm, gezellig en authentiek',       price:2400, delivery:[6,8]   },
+  { id:'klassiek',   name:'Klassiek',   icon:'✦',  desc:'Elegant, verfijnd en duurzaam',      price:3200, delivery:[10,12] },
+  { id:'industrieel',name:'Industrieel',icon:'⚙',  desc:'Ruw, stoer en karaktervol',          price:2600, delivery:[8,10]  },
+];
+
+const HEIGHTS = [195, 215, 235];
+
+const SETUPS = [
+  { id:'recht',   name:'Recht',   desc:'Eén rechte wand',      surcharge:0    },
+  { id:'hoek',    name:'Hoek',    desc:'L-vormige opstelling',  surcharge:0    },
+  { id:'eiland',  name:'Eiland',  desc:'Met vrijstaand eiland', surcharge:2800 },
+  { id:'u-vorm',  name:'U-vorm',  desc:'Drie wanden',           surcharge:1900 },
+];
+
+const OPTIONS = [
+  { id:'softclose', name:'Soft-close scharnieren',    desc:'Zachte, geluidloze sluitwerking',         price:480,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
+  { id:'quartz',    name:'Quartz werkblad',            desc:'Onderhoudsvriendelijk en duurzaam',       price:1200, incompatible:['graniet','hout'],  cornerOnly:false, recommended:['modern','industrieel']},
+  { id:'graniet',   name:'Graniet werkblad',           desc:'Natuursteen met uniek patroon',           price:1800, incompatible:['quartz','hout'],   cornerOnly:false, recommended:['klassiek']           },
+  { id:'hout',      name:'Massief houten werkblad',    desc:'Warm en natuurlijk karakter',             price:950,  incompatible:['quartz','graniet'],cornerOnly:false, recommended:['landelijk']          },
+  { id:'led',       name:'LED onderbouwverlichting',   desc:'Sfeervolle werkverlichting onder kasten', price:320,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
+  { id:'ladeorg',   name:'Ladeorganisatie systeem',    desc:'Slimme en stijlvolle opbergoplossing',    price:560,  incompatible:[],                 cornerOnly:false, recommended:[]                    },
+  { id:'pushopen',  name:'Push-to-open deuren',        desc:'Greeploos, strak design',                 price:740,  incompatible:['grepen'],         cornerOnly:false, recommended:['modern','industrieel']},
+  { id:'grepen',    name:'Design grepen RVS',          desc:'Hoogwaardig roestvrij stalen grepen',     price:380,  incompatible:['pushopen'],       cornerOnly:false, recommended:['klassiek','landelijk']},
+  { id:'carrousel', name:'Carrousel hoekoplossing',    desc:'Optimaal gebruik van hoekruimte',         price:680,  incompatible:[],                 cornerOnly:true,  recommended:[]                    },
+];
+
+const APPLIANCES = [
+  { id:'oven',      name:'Inbouwoven',          desc:'Multifunctionele inbouwoven',       price:890,  incompatible:['stoomoven'] },
+  { id:'inductie',  name:'Inductiekookplaat',   desc:'Energiezuinig en razendsnel',       price:680,  incompatible:[]            },
+  { id:'vaatwasser',name:'Vaatwasser',          desc:'Geïntegreerde inbouw vaatwasser',   price:740,  incompatible:[]            },
+  { id:'koelkast',  name:'Inbouwkoelkast',      desc:'Naadloos geïntegreerde koeling',    price:820,  incompatible:[]            },
+  { id:'afzuigkap', name:'Afzuigkap',           desc:'Effectieve en stijlvolle afzuiging',price:620,  incompatible:[]            },
+  { id:'stoomoven', name:'Combi-stoomoven',      desc:'Combi stoom- en convectie-oven',    price:1480, incompatible:['oven']      },
+];
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+const state = {
+  style:      null,
+  width:      '',
+  depth:      '',
+  height:     215,
+  setup:      'recht',
+  options:    new Set(),
+  appliances: new Set(),
+};
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function eur(n) {
+  return '€\u202F' + n.toLocaleString('nl-NL', { minimumFractionDigits:0, maximumFractionDigits:0 });
+}
+
+function getStyle()  { return STYLES.find(s => s.id === state.style) || null; }
+function getSetup()  { return SETUPS.find(s => s.id === state.setup); }
+
+function isCornerSetup() {
+  return state.setup === 'hoek' || state.setup === 'u-vorm';
+}
+
+/* ── Incompatibility helpers ─────────────────── */
+function disabledOptionReason(opt) {
+  for (const iid of opt.incompatible) {
+    if (state.options.has(iid)) {
+      const blocker = OPTIONS.find(o => o.id === iid);
+      return blocker ? `Niet combineerbaar met "${blocker.name}"` : 'Niet combineerbaar';
+    }
+  }
+  return null;
+}
+
+function disabledApplianceReason(app) {
+  for (const iid of app.incompatible) {
+    if (state.appliances.has(iid)) {
+      const blocker = APPLIANCES.find(a => a.id === iid);
+      return blocker ? `Niet combineerbaar met "${blocker.name}"` : 'Niet combineerbaar';
+    }
+  }
+  return null;
+}
+
+/* ── Calculate ───────────────────────────────── */
+function calculate() {
+  const style = getStyle();
+  const w     = parseFloat(state.width) || 0;
+  const setup = getSetup();
+
+  const basePrice      = style ? (w / 100) * style.price : 0;
+  const setupSurcharge = setup ? setup.surcharge : 0;
+
+  let optTotal = 0;
+  for (const id of state.options) {
+    const o = OPTIONS.find(x => x.id === id);
+    if (o) optTotal += o.price;
+  }
+
+  let appTotal = 0;
+  for (const id of state.appliances) {
+    const a = APPLIANCES.find(x => x.id === id);
+    if (a) appTotal += a.price;
+  }
+
+  const subtotal = basePrice + setupSurcharge + optTotal + appTotal;
+  const vat      = subtotal * 0.21;
+  const total    = subtotal + vat;
+
+  return { basePrice, setupSurcharge, optTotal, appTotal, subtotal, vat, total };
+}
+
+/* ── Delivery time ───────────────────────────── */
+function getDelivery() {
+  const style = getStyle();
+  if (!style) return null;
+  const extra = state.options.size;          // +1 week per custom optie (stap 3)
+  const [lo, hi] = style.delivery;
+  return `${lo + extra}–${hi + extra} weken`;
+}
+
+/* ── Width validation ────────────────────────── */
+function widthValid() {
+  const v = parseFloat(state.width);
+  if (!state.width) return 'empty';
+  if (v < 150)      return 'low';
+  if (v > 600)      return 'high';
+  return 'ok';
+}
+
+function dimensionsOk() {
+  return widthValid() === 'ok';
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Step 1: Styles
+══════════════════════════════════════════════ */
+function renderStyles() {
+  const grid = document.getElementById('style-grid');
+  grid.innerHTML = STYLES.map(s => `
+    <div class="style-card${state.style === s.id ? ' selected' : ''}"
+         data-style="${s.id}" role="button" tabindex="0"
+         aria-pressed="${state.style === s.id}">
+      <div class="style-card-icon">${s.icon}</div>
+      <div class="style-card-name">${s.name}</div>
+      <div class="style-card-desc">${s.desc}</div>
+      <div class="style-card-price">${eur(s.price)} / strekkende meter</div>
+      <div class="check-mark">✓</div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.style-card').forEach(card => {
+    const pick = () => {
+      state.style = card.dataset.style;
+      update();
+    };
+    card.addEventListener('click', pick);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Step 2: Dimensions
+══════════════════════════════════════════════ */
+function renderHeights() {
+  const grp = document.getElementById('height-group');
+  grp.innerHTML = HEIGHTS.map(h => `
+    <button class="btn-pill${state.height === h ? ' selected' : ''}" data-height="${h}">${h} cm</button>
+  `).join('');
+  grp.querySelectorAll('.btn-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.height = parseInt(btn.dataset.height);
+      update();
+    });
+  });
+}
+
+function renderSetup() {
+  const grid = document.getElementById('setup-grid');
+  grid.innerHTML = SETUPS.map(s => `
+    <button class="setup-card${state.setup === s.id ? ' selected' : ''}" data-setup="${s.id}">
+      <span class="setup-name">${s.name}</span>
+      <span class="setup-desc">${s.desc}</span>
+      ${s.surcharge ? `<span class="setup-extra">+ ${eur(s.surcharge)}</span>` : ''}
+    </button>
+  `).join('');
+  grid.querySelectorAll('.setup-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.setup = btn.dataset.setup;
+      // If carrousel was selected but setup no longer allows it, remove it
+      if (!isCornerSetup() && state.options.has('carrousel')) {
+        state.options.delete('carrousel');
+      }
+      update();
+    });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Step 3: Options
+══════════════════════════════════════════════ */
+function renderOptions() {
+  const list = document.getElementById('options-list');
+  const currentStyle = state.style;
+
+  list.innerHTML = OPTIONS.map(opt => {
+    const hidden   = opt.cornerOnly && !isCornerSetup();
+    const reason   = disabledOptionReason(opt);
+    const disabled = !!reason;
+    const selected = state.options.has(opt.id);
+
+    const isRec    = currentStyle && opt.recommended.includes(currentStyle);
+    const styleName = currentStyle ? STYLES.find(s => s.id === currentStyle)?.name : '';
+
+    let cls = 'toggle-item';
+    if (hidden)    cls += ' is-hidden';
+    if (disabled)  cls += ' is-disabled';
+    if (selected)  cls += ' is-selected';
+
+    return `
+      <div class="${cls}" data-opt="${opt.id}"
+           role="checkbox" aria-checked="${selected}" tabindex="${disabled ? -1 : 0}"
+           ${disabled ? `title="${reason}"` : ''}>
+        <div class="sw"></div>
+        <div class="toggle-content">
+          <div class="toggle-name">
+            ${opt.name}
+            ${isRec ? `<span class="badge badge-rec">Aanbevolen voor ${styleName}</span>` : ''}
+          </div>
+          <div class="toggle-desc">${opt.desc}</div>
+          ${disabled ? `<div class="toggle-reason">${reason}</div>` : ''}
+        </div>
+        <div class="toggle-price">${eur(opt.price)}</div>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('.toggle-item:not(.is-disabled):not(.is-hidden)').forEach(el => {
+    const toggle = () => {
+      const id = el.dataset.opt;
+      if (state.options.has(id)) {
+        state.options.delete(id);
+      } else {
+        state.options.add(id);
+      }
+      update();
+    };
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Step 4: Appliances
+══════════════════════════════════════════════ */
+function renderAppliances() {
+  const list = document.getElementById('appliances-list');
+
+  list.innerHTML = APPLIANCES.map(app => {
+    const reason   = disabledApplianceReason(app);
+    const disabled = !!reason;
+    const selected = state.appliances.has(app.id);
+
+    let cls = 'toggle-item';
+    if (disabled)  cls += ' is-disabled';
+    if (selected)  cls += ' is-selected';
+
+    return `
+      <div class="${cls}" data-app="${app.id}"
+           role="checkbox" aria-checked="${selected}" tabindex="${disabled ? -1 : 0}"
+           ${disabled ? `title="${reason}"` : ''}>
+        <div class="sw"></div>
+        <div class="toggle-content">
+          <div class="toggle-name">${app.name}</div>
+          <div class="toggle-desc">${app.desc}</div>
+          ${disabled ? `<div class="toggle-reason">${reason}</div>` : ''}
+        </div>
+        <div class="toggle-price">${eur(app.price)}</div>
+      </div>
+    `;
+  }).join('');
+
+  list.querySelectorAll('.toggle-item:not(.is-disabled)').forEach(el => {
+    const toggle = () => {
+      const id = el.dataset.app;
+      if (state.appliances.has(id)) {
+        state.appliances.delete(id);
+      } else {
+        state.appliances.add(id);
+      }
+      update();
+    };
+    el.addEventListener('click', toggle);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Sidebar
+══════════════════════════════════════════════ */
+function renderSidebar() {
+  const body   = document.getElementById('sidebar-body');
+  const { basePrice, setupSurcharge, optTotal, appTotal, subtotal, vat, total } = calculate();
+  const style  = getStyle();
+  const setup  = getSetup();
+  const dv     = getDelivery();
+  const ready  = state.style && dimensionsOk();
+
+  /* Build option rows */
+  const optRows = [...state.options].map(id => {
+    const o = OPTIONS.find(x => x.id === id);
+    return o ? `<div class="q-row"><span class="q-name">${o.name}</span><span class="q-val">${eur(o.price)}</span></div>` : '';
+  }).join('');
+
+  const appRows = [...state.appliances].map(id => {
+    const a = APPLIANCES.find(x => x.id === id);
+    return a ? `<div class="q-row"><span class="q-name">${a.name}</span><span class="q-val">${eur(a.price)}</span></div>` : '';
+  }).join('');
+
+  /* Style section */
+  const styleSection = style ? `
+    <div class="q-section">
+      <div class="q-label">Basisprijs</div>
+      <div class="q-row">
+        <span class="q-name">${style.name} (${eur(style.price)}/m)</span>
+        <span class="q-val">${dimensionsOk() ? eur(basePrice) : '–'}</span>
+      </div>
+      ${setup && setup.surcharge ? `
+        <div class="q-row">
+          <span class="q-name">Opstelling ${setup.name}</span>
+          <span class="q-val">+ ${eur(setupSurcharge)}</span>
+        </div>` : ''}
+    </div>
+  ` : `<p class="empty-hint">Kies een stijl om te beginnen…</p>`;
+
+  /* Options section */
+  const optSection = state.options.size > 0 ? `
+    <div class="q-section">
+      <div class="q-label">Opties &amp; materialen</div>
+      ${optRows}
+    </div>
+  ` : '';
+
+  /* Appliances section */
+  const appSection = state.appliances.size > 0 ? `
+    <div class="q-section">
+      <div class="q-label">Inbouwapparatuur</div>
+      ${appRows}
+    </div>
+  ` : '';
+
+  /* Delivery */
+  const deliverySection = dv ? `
+    <div class="delivery-tag">
+      <span class="icon">&#128667;</span>
+      <span>Levertijd: <strong>${dv}</strong></span>
+    </div>
+  ` : '';
+
+  /* Totals */
+  const totalsSection = style ? `
+    <div class="q-divider"></div>
+    <div class="q-total-row muted">
+      <span>Subtotaal excl. BTW</span>
+      <span>${eur(subtotal)}</span>
+    </div>
+    <div class="q-total-row muted">
+      <span>BTW (21%)</span>
+      <span>${eur(vat)}</span>
+    </div>
+    <div class="q-total-row big">
+      <span>Totaal incl. BTW</span>
+      <span>${eur(total)}</span>
+    </div>
+    <div class="q-divider"></div>
+  ` : '<div class="q-divider"></div>';
+
+  /* Missing fields warning */
+  const missingParts = [];
+  if (!state.style)       missingParts.push('keukenstijl');
+  if (!dimensionsOk())    missingParts.push('geldige breedte');
+
+  const missingWarn = missingParts.length ? `
+    <div class="warn-box show">
+      Vul nog in: <strong>${missingParts.join(' en ')}</strong> om een offerte aan te vragen.
+    </div>
+  ` : '';
+
+  body.innerHTML = `
+    ${styleSection}
+    ${optSection}
+    ${appSection}
+    ${totalsSection}
+    ${deliverySection}
+    ${missingWarn}
+    <button class="btn-cta" id="btn-quote" ${ready ? '' : 'disabled'}>
+      Offerte aanvragen
+    </button>
+  `;
+
+  document.getElementById('btn-quote')?.addEventListener('click', () => {
+    alert('Bedankt voor uw interesse!\n\nIn een echte implementatie wordt hier het offerteformulier geopend of de gegevens verstuurd.\n\nWe nemen zo snel mogelijk contact met u op.');
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER – Width/Depth validation messages
+══════════════════════════════════════════════ */
+function renderFieldMessages() {
+  const wMsg = document.getElementById('msg-width');
+  const wInp = document.getElementById('inp-width');
+  const wv   = widthValid();
+
+  wInp.classList.remove('has-error');
+  wMsg.className = 'field-msg';
+  wMsg.textContent = '';
+
+  if (wv === 'low') {
+    wInp.classList.add('has-error');
+    wMsg.classList.add('err');
+    wMsg.textContent = 'Minimum breedte is 150 cm.';
+  } else if (wv === 'high') {
+    wInp.classList.add('has-error');
+    wMsg.classList.add('err');
+    wMsg.textContent = 'Maximum breedte is 600 cm.';
+  } else if (wv === 'ok') {
+    const w = parseFloat(state.width);
+    if (w > 450) {
+      wMsg.classList.add('warn');
+      wMsg.textContent = 'Tip: overweeg een U-vorm of Eiland opstelling voor deze breedte.';
+    }
+  }
+
+  /* Depth */
+  const dMsg = document.getElementById('msg-depth');
+  const dInp = document.getElementById('inp-depth');
+  const d    = parseFloat(state.depth);
+
+  dInp.classList.remove('has-error');
+  dMsg.className = 'field-msg';
+  dMsg.textContent = '';
+
+  if (state.depth && (d < 50 || d > 90)) {
+    dInp.classList.add('has-error');
+    dMsg.classList.add('err');
+    dMsg.textContent = d < 50 ? 'Minimum diepte is 50 cm.' : 'Maximum diepte is 90 cm.';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   MASTER UPDATE
+══════════════════════════════════════════════ */
+function update() {
+  renderStyles();
+  renderHeights();
+  renderSetup();
+  renderOptions();
+  renderAppliances();
+  renderFieldMessages();
+  renderSidebar();
+}
+
+/* ══════════════════════════════════════════════
+   INPUT BINDINGS (width / depth)
+══════════════════════════════════════════════ */
+document.getElementById('inp-width').addEventListener('input', e => {
+  state.width = e.target.value;
+  update();
+});
+
+document.getElementById('inp-depth').addEventListener('input', e => {
+  state.depth = e.target.value;
+  update();
+});
+
+/* ══════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════ */
+update();
+</script>
+</body>
+</html>
